@@ -592,6 +592,15 @@ table.inv-table tbody td{padding:11px 13px;border-bottom:1px solid #EFE4EB;font-
 .bpa-src{margin-top:9px;padding-top:8px;border-top:1px dashed var(--glass-border);font-size:11.5px;color:var(--ink-soft);line-height:1.6}
 .bpa-src b{display:block;margin-bottom:3px;color:var(--ink)}
 .bpa-src a{color:var(--rose-d);text-decoration:underline}
+.cx-status{font-size:12.5px;font-weight:600;color:var(--ink-soft)}
+.cx-status.ok{color:#16A37B}
+.cx-status.bad{color:var(--rouge)}
+.cx-hint{font-size:11.5px;color:var(--ink-faint);margin-top:9px;line-height:1.5}
+.cx-lbl{font-size:13px;font-weight:600;color:var(--ink-soft)}
+.cx-map{display:flex;flex-direction:column;gap:8px;margin:12px 0}
+.cx-map-row{display:flex;align-items:center;gap:12px}
+.cx-map-row>span{flex:0 0 130px;font-size:13px;font-weight:600;color:var(--ink)}
+.cx-map-row>select{flex:1}
 .pb-locked{max-width:460px;margin:40px auto;text-align:center;background:var(--surface);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:24px;box-shadow:var(--shadow);padding:40px 30px;animation:rise .5s ease both}
 .pb-lock-ic{width:70px;height:70px;border-radius:20px;margin:0 auto 18px;background:var(--rose-l);display:grid;place-items:center;font-size:32px}
 .pb-locked h2{font-family:'Fraunces',serif;font-size:22px;font-weight:700;color:var(--ink);margin-bottom:8px}
@@ -743,6 +752,7 @@ html[dir=rtl] .ai-msg.bot{flex-direction:row-reverse}
     <div class="nav-label" data-i18n="nav_assistant_label">Assistant</div>
     <div class="nav-item" data-page="assistant"><span class="ic ai-nav-ic" id="aiNavIcon"></span> <span data-i18n="nav_assistant">Assistant IA</span></div>
     <div class="nav-item" data-page="sync"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg></span> <span data-i18n="nav_sync">Synchronisation</span></div>
+    <div class="nav-item" data-page="connexions"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.07 0l1.93-1.93a5 5 0 0 0-7.07-7.07L10.5 5.5"/><path d="M14 11a5 5 0 0 0-7.07 0L5 12.93a5 5 0 0 0 7.07 7.07L13.5 18.5"/></svg></span> <span data-i18n="nav_connexions">Connexions</span></div>
     <div class="sidebar-foot">
       💾 <span data-i18n="foot_saved">Tes données sont enregistrées automatiquement sur cet appareil.</span>
     </div>
@@ -961,9 +971,9 @@ const DEFAULT_STATE = {
     lang:'fr', lockEnabled:false, lockPass:null, lockRemember:false, aiSpeak:false,
     coAddress:'', coPhone:'', coEmail:'', coTaxId:'', coWebsite:'',
     invNote:'', invSignature:null, invSignName:'',
-    myWhatsApp:'', myEmail:'', msgSignature:'' },
+    myWhatsApp:'', myEmail:'', msgSignature:'', chariowKey:'' },
   recettes:[], depenses:[],
-  factures:[], commandes:[], clients:[], prospects:[],
+  factures:[], commandes:[], clients:[], prospects:[], comptes:[],
   bizplan:{ projet:'', porteur:'', secteur:'', zone:'Afrique francophone', mission:'', cible:'', canaux:'',
     forces:'', faiblesses:'', opportunites:'', menaces:'',
     prev:[ {poste:'Chiffre d\'affaires',a1:3000000,a2:5500000,a3:9000000},
@@ -993,6 +1003,7 @@ const PAGES = {
   assistant:{title:'Assistant IA', sub:'Pose une question sur ton activité', render:renderAssistant, actions:''},
   sync:{title:'Synchronisation', sub:'Transfère ton activité entre tes appareils', render:renderSync, actions:''},
   messages:{title:'Messages', sub:'Relance et remercie tes clients', render:renderMessages, actions:''},
+  connexions:{title:'Connexions', sub:'Connecte tes comptes et collecte tes données', render:renderConnexions, actions:''},
 };
 let currentPage = 'accueil';
 let priceState = { items:[{id:uid(),nom:'',qte:1,cout:0}], labor:[{id:uid(),tache:'',min:0,taux:0}], autres:0, marge:40, tva:18, nom:'' };
@@ -1007,7 +1018,7 @@ function go(page){
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active', n.dataset.page===page));
   const p = PAGES[page];
   // titres/sous-titres traduits selon la langue active
-  const titleKeys={accueil:['nav_home','sub_home'],finance:['nav_finance','sub_finance'],recettes:['nav_income','sub_income'],factures:['nav_invoicing','sub_invoicing'],commandes:['nav_orders','sub_orders'],clients:['nav_clients','sub_clients'],prospection:['nav_prospecting','sub_prospecting'],prix:['nav_pricing','sub_pricing'],bizplan:['nav_bizplan','sub_bizplan'],assistant:['nav_assistant','sub_assistant'],sync:['nav_sync','sub_sync'],messages:['nav_messages','sub_messages']};
+  const titleKeys={accueil:['nav_home','sub_home'],finance:['nav_finance','sub_finance'],recettes:['nav_income','sub_income'],factures:['nav_invoicing','sub_invoicing'],commandes:['nav_orders','sub_orders'],clients:['nav_clients','sub_clients'],prospection:['nav_prospecting','sub_prospecting'],prix:['nav_pricing','sub_pricing'],bizplan:['nav_bizplan','sub_bizplan'],assistant:['nav_assistant','sub_assistant'],sync:['nav_sync','sub_sync'],messages:['nav_messages','sub_messages'],connexions:['nav_connexions','sub_connexions']};
   const tk=titleKeys[page];
   $('#pageTitle').textContent = tk ? t(tk[0]) : p.title;
   $('#pageSub').textContent = tk ? t(tk[1]) : p.sub;
@@ -1534,6 +1545,8 @@ const I18N = {
   // --- Synchronisation / transfert ---
   nav_sync:{fr:"Synchronisation",en:"Sync",ar:"المزامنة"},
   sub_sync:{fr:"Transfère ton activité entre tes appareils",en:"Transfer your data between devices",ar:"انقل بياناتك بين أجهزتك"},
+  nav_connexions:{fr:"Connexions",en:"Connections",ar:"الاتصالات"},
+  sub_connexions:{fr:"Connecte tes comptes et collecte tes données",en:"Connect your accounts and collect your data",ar:"اربط حساباتك واجمع بياناتك"},
   sync_intro:{fr:"Transfère toutes tes données (recettes, factures, clients, réglages…) d'un appareil à un autre — par exemple de ton ordinateur vers ton téléphone.",en:"Transfer all your data (income, invoices, clients, settings…) from one device to another — for example from your computer to your phone.",ar:"انقل جميع بياناتك (الإيرادات، الفواتير، العملاء، الإعدادات…) من جهاز إلى آخر — مثلاً من حاسوبك إلى هاتفك."},
   sync_export_title:{fr:"Exporter mes données",en:"Export my data",ar:"تصدير بياناتي"},
   sync_export_sub:{fr:"Crée une sauvegarde de toute ton activité, à transférer vers un autre appareil.",en:"Create a backup of all your data to transfer to another device.",ar:"أنشئ نسخة احتياطية من جميع بياناتك لنقلها إلى جهاز آخر."},
@@ -15392,6 +15405,7 @@ function bindPage(page){
   if(page==='assistant'){ bindAssistant(); }
   if(page==='sync'){ bindSync(); }
   if(page==='messages'){ bindMessages(); }
+  if(page==='connexions'){ bindConnexions(); }
 }
 function bindBp(){
   $('#bpTbl').querySelectorAll('tr').forEach(tr=>{
@@ -15468,6 +15482,158 @@ function bindBpAgent(){
   }
   if(web) web.addEventListener('click',()=>{ const on=web.classList.toggle('on'); web.setAttribute('aria-pressed',on?'true':'false'); });
   if(sg) sg.querySelectorAll('.ai-chip').forEach(ch=>ch.addEventListener('click',()=>bpAgentAsk(ch.dataset.q)));
+}
+
+/* ============================================================
+   CONNEXIONS — registre (gratuit) + import Chariow & fichiers (Premium)
+   ============================================================ */
+const CX_TYPES=['Chariow','Site web','Boutique en ligne','Instagram','Facebook','TikTok','WhatsApp Business','Autre'];
+function renderConnexions(){
+  const lk=isPremium()?'':' 🔒';
+  return `
+  <div class="card">
+    <div class="card-title">🔗 ${t('cx_accounts_title')}</div>
+    <div class="card-sub">${t('cx_accounts_sub')}</div>
+    <div class="tbl-wrap"><table id="cxTbl"><thead><tr><th style="width:175px">${t('cx_c_type')}</th><th>${t('cx_c_label')}</th><th>${t('cx_c_link')}</th><th style="width:34px"></th></tr></thead><tbody></tbody></table></div>
+    <button class="add-row" data-addcompte>${t('cx_add_account')}</button>
+  </div>
+  <div class="card section-gap">
+    <div class="card-title">🛒 ${t('cx_chariow_title')}${lk}</div>
+    <div class="card-sub">${t('cx_chariow_sub')}</div>
+    <div class="field"><label>${t('cx_chariow_key')}</label><input id="cxChariowKey" type="password" placeholder="sk_live_…" autocomplete="off" value="${esc(state.settings.chariowKey||'')}"></div>
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><button class="btn btn-primary" id="cxChariowImport">${t('cx_import_now')}</button><span class="cx-status" id="cxChariowStatus"></span></div>
+    <div class="cx-hint">${t('cx_chariow_hint')}</div>
+  </div>
+  <div class="card section-gap">
+    <div class="card-title">📥 ${t('cx_import_title')}${lk}</div>
+    <div class="card-sub">${t('cx_import_sub')}</div>
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px"><label class="cx-lbl">${t('cx_import_target')}</label><select id="cxTarget"><option value="clients">${t('cx_target_clients')}</option><option value="recettes">${t('cx_target_income')}</option><option value="commandes">${t('cx_target_orders')}</option></select><input type="file" id="cxFile" accept=".csv,.xlsx,.xls"></div>
+    <div id="cxMap"></div>
+    <div class="cx-status" id="cxImportStatus"></div>
+  </div>`;
+}
+function compteRow(c){
+  return `<tr data-id="${c.id}">
+    <td><select data-f="type">${CX_TYPES.map(s=>`<option value="${s}" ${c.type===s?'selected':''}>${s}</option>`).join('')}</select></td>
+    <td><input data-f="label" value="${esc(c.label||'')}" placeholder="${esc(t('cx_ph_label'))}"></td>
+    <td><input data-f="link" value="${esc(c.link||'')}" placeholder="https://…"></td>
+    <td><button class="row-del">×</button></td></tr>`;
+}
+function fillComptes(){ const b=$('#cxTbl tbody'); if(b) b.innerHTML=(state.comptes||[]).map(compteRow).join(''); }
+function bindConnexions(){
+  state.comptes=state.comptes||[];
+  fillComptes(); bindRecords('#cxTbl','comptes',null);
+  const add=document.querySelector('[data-addcompte]');
+  if(add) add.addEventListener('click',()=>{ state.comptes.push({id:uid(),type:CX_TYPES[0],label:'',link:''}); fillComptes(); bindRecords('#cxTbl','comptes',null); save(); });
+  const ck=document.getElementById('cxChariowKey');
+  if(ck) ck.addEventListener('input',()=>{ state.settings.chariowKey=ck.value.trim(); save(); });
+  const cimp=document.getElementById('cxChariowImport');
+  if(cimp) cimp.addEventListener('click',cxChariowImport);
+  const tgt=document.getElementById('cxTarget'); if(tgt) tgt.addEventListener('change',cxRenderMap);
+  const file=document.getElementById('cxFile');
+  if(file) file.addEventListener('change',e=>{ if(!pbRequire()){ e.target.value=''; return; } if(e.target.files&&e.target.files[0]) cxOnFile(e.target.files[0]); });
+}
+async function cxChariowImport(){
+  if(!pbRequire()) return;
+  const status=document.getElementById('cxChariowStatus');
+  const setS=(m,cls)=>{ if(status){ status.textContent=m; status.className='cx-status'+(cls?(' '+cls):''); } };
+  const key=(state.settings.chariowKey||'').trim();
+  if(!key){ setS(t('cx_need_key'),'bad'); return; }
+  setS(t('cx_importing'));
+  try{
+    const res=await fetch(PB_CHARIOW_FN,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key,license:(pbPremium()||{}).key})});
+    const d=await res.json();
+    if(!res.ok){ setS(d&&d.error==='subscription_required'?t('cx_need_premium'):t('cx_chariow_fail'),'bad'); return; }
+    let nCli=0,nRec=0;
+    (d.customers||[]).forEach(c=>{
+      const cid=(c.id!=null)?('chariow-cust:'+c.id):null;
+      const nom=c.name||c.full_name||[c.first_name,c.last_name].filter(Boolean).join(' ')||'';
+      const email=c.email||''; const tel=c.phone||c.phone_number||'';
+      if(!nom && !email) return;
+      if(cid && state.clients.some(x=>x.ext===cid)) return;
+      if(!cid && email && state.clients.some(x=>x.email===email)) return;
+      state.clients.push({id:uid(),nom,tel,email,ville:c.city||c.country||'',source:'Chariow',statut:'Client',ext:cid||undefined}); nCli++;
+    });
+    (d.sales||[]).forEach(s=>{
+      const amount=num(s.amount!=null?s.amount:(s.total!=null?s.total:s.price));
+      if(!amount) return;
+      const sid=(s.id!=null)?('chariow-sale:'+s.id):null;
+      if(sid && state.recettes.some(r=>r.ext===sid)) return;
+      const date=String(s.created_at||s.date||s.paid_at||todayISO()).slice(0,10);
+      const label=s.product||s.product_name||s.item||s.customer||s.customer_name||'Vente Chariow';
+      state.recettes.push({id:uid(),date,source:label,cat:(typeof REC_CATS!=='undefined'&&REC_CATS.length?REC_CATS[0]:'Ventes'),ht:amount,ext:sid||undefined}); nRec++;
+    });
+    save();
+    setS(tf('cx_chariow_ok',{cli:nCli,rec:nRec}),'ok');
+  }catch(e){ setS(t('cx_chariow_fail'),'bad'); }
+}
+let _cxRows=null,_cxCols=[];
+const CX_FIELDS={
+  clients:[['nom','cx_f_name'],['tel','cx_f_phone'],['email','cx_f_email'],['ville','cx_f_city']],
+  recettes:[['date','cx_f_date'],['source','cx_f_source'],['ht','cx_f_amount']],
+  commandes:[['num','cx_f_num'],['date','cx_f_date'],['client','cx_f_client'],['produit','cx_f_product'],['qte','cx_f_qty'],['pu','cx_f_price']]
+};
+function cxNorm(s){ return String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,''); }
+function cxAutoMatch(field,col){
+  const c=cxNorm(col);
+  const map={nom:['nom','name','client','customer','contact'],tel:['tel','phone','mobile','whatsapp','numero'],email:['email','mail','courriel'],ville:['ville','city','pays','country','adresse','address'],date:['date','jour'],source:['source','produit','product','desc','libelle','label','article','item'],ht:['montant','amount','total','prix','price','revenu','revenue','net'],num:['num','ref','commande','order','facture'],client:['client','customer','nom','name'],produit:['produit','product','article','item','desc'],qte:['qte','qty','quantite','quantity','nombre'],pu:['pu','prix','price','unitaire','unit','montant','amount']};
+  return (map[field]||[]).some(k=>c.includes(k));
+}
+function cxOnFile(file){
+  const status=document.getElementById('cxImportStatus');
+  const setS=(m,cls)=>{ if(status){ status.textContent=m; status.className='cx-status'+(cls?(' '+cls):''); } };
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      const wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array'});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const rows=XLSX.utils.sheet_to_json(ws,{defval:''});
+      if(!rows.length){ setS(t('cx_import_empty'),'bad'); return; }
+      _cxRows=rows; _cxCols=Object.keys(rows[0]);
+      cxRenderMap();
+      setS(tf('cx_import_loaded',{n:rows.length}));
+    }catch(e){ setS(t('cx_import_error'),'bad'); }
+  };
+  reader.readAsArrayBuffer(file);
+}
+function cxRenderMap(){
+  const box=document.getElementById('cxMap'); if(!box) return;
+  if(!_cxRows){ box.innerHTML=''; return; }
+  const target=document.getElementById('cxTarget').value;
+  box.innerHTML=`<div class="cx-map">`+CX_FIELDS[target].map(([f,lbl])=>{
+    const opts=`<option value="">—</option>`+_cxCols.map(c=>`<option value="${esc(c)}" ${cxAutoMatch(f,c)?'selected':''}>${esc(c)}</option>`).join('');
+    return `<div class="cx-map-row"><span>${t(lbl)}</span><select data-mapfield="${f}">${opts}</select></div>`;
+  }).join('')+`</div><button class="btn btn-primary" id="cxDoImport">${t('cx_import_btn')}</button>`;
+  const btn=document.getElementById('cxDoImport'); if(btn) btn.addEventListener('click',cxDoImport);
+}
+function cxDoImport(){
+  if(!pbRequire()) return;
+  if(!_cxRows) return;
+  const target=document.getElementById('cxTarget').value;
+  const status=document.getElementById('cxImportStatus');
+  const map={}; document.querySelectorAll('#cxMap [data-mapfield]').forEach(s=>{ if(s.value) map[s.dataset.mapfield]=s.value; });
+  const g=(row,f)=>map[f]!=null?row[map[f]]:'';
+  let n=0;
+  _cxRows.forEach(row=>{
+    if(target==='clients'){
+      const nom=String(g(row,'nom')||'').trim(), email=String(g(row,'email')||'').trim();
+      if(!nom && !email) return;
+      state.clients.push({id:uid(),nom,tel:String(g(row,'tel')||''),email,ville:String(g(row,'ville')||''),source:'Import',statut:'Client'}); n++;
+    } else if(target==='recettes'){
+      const ht=num(g(row,'ht')); const src=String(g(row,'source')||'').trim();
+      if(!ht && !src) return;
+      state.recettes.push({id:uid(),date:String(g(row,'date')||todayISO()).slice(0,10),source:src||'Import',cat:(typeof REC_CATS!=='undefined'&&REC_CATS.length?REC_CATS[0]:'Ventes'),ht}); n++;
+    } else if(target==='commandes'){
+      const cl=String(g(row,'client')||'').trim(), pr=String(g(row,'produit')||'').trim();
+      if(!cl && !pr) return;
+      state.commandes.push({id:uid(),num:String(g(row,'num')||('CMD-'+String(state.commandes.length+1).padStart(3,'0'))),date:String(g(row,'date')||todayISO()).slice(0,10),client:cl,produit:pr,qte:num(g(row,'qte'))||1,pu:num(g(row,'pu')),statut:'En préparation'}); n++;
+    }
+  });
+  save();
+  if(status){ status.textContent=tf('cx_imported_n',{n}); status.className='cx-status ok'; }
+  toast(tf('cx_imported_n',{n}));
+  _cxRows=null; _cxCols=[]; const box=document.getElementById('cxMap'); if(box) box.innerHTML='';
+  const fi=document.getElementById('cxFile'); if(fi) fi.value='';
 }
 // dynamic tables for priceState (items/labor)
 function bindDynTable(sel,arrKey,store,onChange){
@@ -15896,6 +16062,46 @@ Object.assign(I18N, {
   bpa_chip_value:{fr:"Rédige ma proposition de valeur",en:"Write my value proposition",ar:"اكتب عرض القيمة الخاص بي"},
   bpa_chip_trends:{fr:"Tendances du marché",en:"Market trends",ar:"اتجاهات السوق"},
   bpa_chip_price:{fr:"Stratégie de prix",en:"Pricing strategy",ar:"استراتيجية التسعير"},
+  cx_accounts_title:{fr:"Mes comptes business",en:"My business accounts",ar:"حساباتي التجارية"},
+  cx_accounts_sub:{fr:"Ajoute tes comptes et liens (boutique, réseaux…) — gratuit. Ils aident aussi l'agent IA à mieux connaître ton activité.",en:"Add your accounts and links (store, socials…) — free. They also help the AI agent understand your business.",ar:"أضف حساباتك وروابطك (متجر، شبكات…) — مجانًا. تساعد أيضًا وكيل الذكاء الاصطناعي على فهم نشاطك."},
+  cx_c_type:{fr:"Type",en:"Type",ar:"النوع"},
+  cx_c_label:{fr:"Nom / identifiant",en:"Name / handle",ar:"الاسم / المعرّف"},
+  cx_c_link:{fr:"Lien",en:"Link",ar:"الرابط"},
+  cx_add_account:{fr:"+ Ajouter un compte",en:"+ Add an account",ar:"+ إضافة حساب"},
+  cx_ph_label:{fr:"Ex : Ma boutique Chariow",en:"e.g. My Chariow store",ar:"مثال: متجري على Chariow"},
+  cx_chariow_title:{fr:"Connecter Chariow (import auto)",en:"Connect Chariow (auto import)",ar:"ربط Chariow (استيراد تلقائي)"},
+  cx_chariow_sub:{fr:"Colle ta clé API Chariow : on importe automatiquement tes ventes (→ recettes) et tes clients (→ contacts).",en:"Paste your Chariow API key: we automatically import your sales (→ income) and customers (→ contacts).",ar:"الصق مفتاح Chariow API: نستورد تلقائيًا مبيعاتك (← الإيرادات) وعملاءك (← جهات الاتصال)."},
+  cx_chariow_key:{fr:"Clé API Chariow (de TON compte)",en:"Chariow API key (from YOUR account)",ar:"مفتاح Chariow API (من حسابك)"},
+  cx_import_now:{fr:"Importer maintenant",en:"Import now",ar:"استورد الآن"},
+  cx_chariow_hint:{fr:"Ta clé reste sur ton appareil ; l'import passe par une fonction sécurisée. Réservé aux abonnés Premium.",en:"Your key stays on your device; the import goes through a secure function. Premium only.",ar:"يبقى مفتاحك على جهازك؛ يتم الاستيراد عبر دالة آمنة. لمشتركي بريميوم فقط."},
+  cx_need_key:{fr:"Entre d'abord ta clé API Chariow.",en:"Enter your Chariow API key first.",ar:"أدخل مفتاح Chariow API أولاً."},
+  cx_importing:{fr:"Import en cours…",en:"Importing…",ar:"جارٍ الاستيراد…"},
+  cx_need_premium:{fr:"Réservé aux abonnés Premium.",en:"Premium subscribers only.",ar:"لمشتركي بريميوم فقط."},
+  cx_chariow_fail:{fr:"Import impossible (vérifie ta clé Chariow ou réessaie).",en:"Import failed (check your Chariow key or try again).",ar:"فشل الاستيراد (تحقق من مفتاح Chariow أو أعد المحاولة)."},
+  cx_chariow_ok:{fr:"✅ Importé : {cli} client(s), {rec} vente(s).",en:"✅ Imported: {cli} customer(s), {rec} sale(s).",ar:"✅ تم الاستيراد: {cli} عميل، {rec} عملية بيع."},
+  cx_import_title:{fr:"Importer un fichier (CSV / Excel)",en:"Import a file (CSV / Excel)",ar:"استيراد ملف (CSV / Excel)"},
+  cx_import_sub:{fr:"Pour toute autre plateforme : exporte un fichier, choisis la destination et fais correspondre les colonnes.",en:"For any other platform: export a file, pick the destination and map the columns.",ar:"لأي منصة أخرى: صدّر ملفًا، اختر الوجهة وطابِق الأعمدة."},
+  cx_import_target:{fr:"Importer vers :",en:"Import into:",ar:"استيراد إلى:"},
+  cx_target_clients:{fr:"Clients / contacts",en:"Customers / contacts",ar:"العملاء / جهات الاتصال"},
+  cx_target_income:{fr:"Recettes",en:"Income",ar:"الإيرادات"},
+  cx_target_orders:{fr:"Commandes",en:"Orders",ar:"الطلبات"},
+  cx_f_name:{fr:"Nom",en:"Name",ar:"الاسم"},
+  cx_f_phone:{fr:"Téléphone",en:"Phone",ar:"الهاتف"},
+  cx_f_email:{fr:"Email",en:"Email",ar:"البريد"},
+  cx_f_city:{fr:"Ville",en:"City",ar:"المدينة"},
+  cx_f_date:{fr:"Date",en:"Date",ar:"التاريخ"},
+  cx_f_source:{fr:"Libellé / produit",en:"Label / product",ar:"التسمية / المنتج"},
+  cx_f_amount:{fr:"Montant",en:"Amount",ar:"المبلغ"},
+  cx_f_num:{fr:"N° commande",en:"Order #",ar:"رقم الطلب"},
+  cx_f_client:{fr:"Client",en:"Customer",ar:"العميل"},
+  cx_f_product:{fr:"Produit",en:"Product",ar:"المنتج"},
+  cx_f_qty:{fr:"Quantité",en:"Quantity",ar:"الكمية"},
+  cx_f_price:{fr:"Prix unitaire",en:"Unit price",ar:"سعر الوحدة"},
+  cx_import_btn:{fr:"Importer ces lignes",en:"Import these rows",ar:"استيراد هذه الصفوف"},
+  cx_import_loaded:{fr:"{n} ligne(s) lue(s). Vérifie les colonnes puis importe.",en:"{n} row(s) read. Check the columns then import.",ar:"تمت قراءة {n} صف. تحقق من الأعمدة ثم استورد."},
+  cx_import_empty:{fr:"Fichier vide ou illisible.",en:"Empty or unreadable file.",ar:"ملف فارغ أو غير قابل للقراءة."},
+  cx_import_error:{fr:"Impossible de lire ce fichier.",en:"Couldn't read this file.",ar:"تعذّرت قراءة هذا الملف."},
+  cx_imported_n:{fr:"✅ {n} ligne(s) importée(s).",en:"✅ {n} row(s) imported.",ar:"✅ تم استيراد {n} صف."},
   ai_smart_premium:{fr:"🔒 Premium requis",en:"🔒 Premium required",ar:"🔒 يتطلب بريميوم"},
   ai_smart_desc_premium:{fr:"L'IA en ligne est incluse dans Premium (rien à configurer). Active ton abonnement pour en profiter. L'analyse locale reste gratuite.",en:"Online AI is included with Premium (nothing to set up). Activate your subscription to use it. Local analysis stays free.",ar:"الذكاء الاصطناعي عبر الإنترنت مُضمَّن في بريميوم (دون إعداد). فعّل اشتراكك للاستفادة. يبقى التحليل المحلي مجانيًا."},
 });
@@ -15904,6 +16110,7 @@ Object.assign(I18N, {
 const PB_LICENSE_FN = '/.netlify/functions/verify-license';
 const PB_AI_FN      = '/.netlify/functions/ai';
 const PB_SEARCH_FN  = '/.netlify/functions/search';
+const PB_CHARIOW_FN = '/.netlify/functions/chariow-sync';
 let   PB_CHECKOUT_URL = 'https://vwspsose.mychariow.shop/prd_qp1e5dv4';
 let   PB_PRICE_LABEL  = '3 000 FCFA / mois';
 
@@ -16049,7 +16256,8 @@ function aiBuildContext(){
     `Commandes: ${state.commandes.length}`,
     `Clients: ${state.clients.length}, Prospects: ${state.prospects.length}`,
     `Objectif CA annuel: ${FCFA(num(state.settings.objectif))}`,
-  ].join('\n');
+    ((state.comptes&&state.comptes.length)?('Comptes business connectés: '+state.comptes.map(c=>`${c.type}${c.label?(' '+c.label):''}${c.link?(' '+c.link):''}`).join(' | ')):''),
+  ].filter(Boolean).join('\n');
 }
 
 function stat(label, value){ return `<span class="stat"><b>${label} :</b> ${value}</span>`; }
