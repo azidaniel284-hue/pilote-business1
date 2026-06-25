@@ -24,6 +24,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 /* ============================================================
    PILOTE BUSINESS — Design system "Vibrant" (clair + sombre)
@@ -601,6 +602,13 @@ table.inv-table tbody td{padding:11px 13px;border-bottom:1px solid #EFE4EB;font-
 .cx-map-row{display:flex;align-items:center;gap:12px}
 .cx-map-row>span{flex:0 0 130px;font-size:13px;font-weight:600;color:var(--ink)}
 .cx-map-row>select{flex:1}
+.cl-status{font-size:12.5px;font-weight:600;color:var(--ink-soft);min-height:16px;margin-top:8px}
+.cl-status.ok{color:#16A37B}
+.cl-status.bad{color:var(--rouge)}
+.cl-form{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+.cl-form input{flex:1;min-width:180px}
+.cl-conflict{background:var(--rose-xl);border:1px solid var(--rose-l);border-radius:13px;padding:12px;margin-top:8px}
+.cl-conflict p{font-size:13px;color:var(--ink);margin-bottom:8px}
 .pb-locked{max-width:460px;margin:40px auto;text-align:center;background:var(--surface);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:24px;box-shadow:var(--shadow);padding:40px 30px;animation:rise .5s ease both}
 .pb-lock-ic{width:70px;height:70px;border-radius:20px;margin:0 auto 18px;background:var(--rose-l);display:grid;place-items:center;font-size:32px}
 .pb-locked h2{font-family:'Fraunces',serif;font-size:22px;font-weight:700;color:var(--ink);margin-bottom:8px}
@@ -983,7 +991,7 @@ const DEFAULT_STATE = {
 };
 let state = load();
 function load(){ try{ const s=JSON.parse(localStorage.getItem(KEY)); return s?{...structuredClone(DEFAULT_STATE),...s}:structuredClone(DEFAULT_STATE);}catch(e){return structuredClone(DEFAULT_STATE);} }
-function save(){ localStorage.setItem(KEY, JSON.stringify(state)); }
+function save(){ localStorage.setItem(KEY, JSON.stringify(state)); if(typeof cloudPushDebounced==='function') cloudPushDebounced(); }
 let charts = {};
 function destroyCharts(){ Object.values(charts).forEach(c=>{try{c.destroy()}catch(e){}}); charts={}; }
 
@@ -14498,6 +14506,7 @@ function bindOrderViews(){
 
 function renderSync(){
   return `
+  <div id="clAccount"></div>
   <div class="card" style="margin-bottom:18px">
     <div class="card-sub" style="margin-bottom:0">${t('sync_intro')}</div>
   </div>
@@ -14556,7 +14565,7 @@ function syncBuildBackup(){
       recettes: state.recettes, depenses: state.depenses,
       factures: state.factures, commandes: state.commandes,
       clients: state.clients, prospects: state.prospects,
-      bizplan: state.bizplan
+      bizplan: state.bizplan, comptes: state.comptes
     }
   };
 }
@@ -14567,7 +14576,7 @@ function syncApplyBackup(obj){
   const d = obj.data;
   // fusion prudente : on garde la structure attendue
   if(d.settings) state.settings = Object.assign({}, state.settings, d.settings);
-  ['recettes','depenses','factures','commandes','clients','prospects'].forEach(k=>{
+  ['recettes','depenses','factures','commandes','clients','prospects','comptes'].forEach(k=>{
     if(Array.isArray(d[k])) state[k]=d[k];
   });
   if(d.bizplan) state.bizplan = d.bizplan;
@@ -14577,6 +14586,7 @@ function syncApplyBackup(obj){
 let syncScanStream=null, syncScanRAF=null;
 
 function bindSync(){
+  cloudRenderAccount();
   // ----- EXPORT : QR -----
   const showQr=$('#syncShowQr');
   if(showQr) showQr.addEventListener('click',()=>{
@@ -15635,6 +15645,142 @@ function cxDoImport(){
   _cxRows=null; _cxCols=[]; const box=document.getElementById('cxMap'); if(box) box.innerHTML='';
   const fi=document.getElementById('cxFile'); if(fi) fi.value='';
 }
+
+/* ============================================================
+   COMPTE EN LIGNE — Supabase (auth email + sauvegarde cloud du state)
+   ============================================================ */
+let _sb=null, _sbUser=null, _sbPushT=null, _sbStatusEl=null;
+function sbConfigured(){ return !!(SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase && window.supabase.createClient); }
+function sbClient(){
+  if(!sbConfigured()) return null;
+  if(!_sb) _sb=window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  return _sb;
+}
+function cloudStatus(msg, cls){ if(!_sbStatusEl) _sbStatusEl=document.getElementById('clStatus'); if(_sbStatusEl){ _sbStatusEl.textContent=msg||''; _sbStatusEl.className='cl-status'+(cls?(' '+cls):''); } }
+function cloudHasLocalData(){ return ['recettes','depenses','factures','commandes','clients','prospects','comptes'].some(k=>Array.isArray(state[k])&&state[k].length); }
+function cloudDataHas(d){ return d && ['recettes','clients','commandes','factures'].some(k=>Array.isArray(d[k])&&d[k].length); }
+function cloudLoadInto(d){ state = Object.assign(structuredClone(DEFAULT_STATE), d||{}); localStorage.setItem(KEY, JSON.stringify(state)); }
+async function cloudInit(){
+  const c=sbClient(); if(!c) return;
+  try{
+    const { data:{ session } } = await c.auth.getSession();
+    _sbUser = session ? session.user : null;
+    c.auth.onAuthStateChange((_e, s)=>{ _sbUser = s ? s.user : null; cloudRenderAccount(); });
+    if(_sbUser){ await cloudOnLogin(); }
+  }catch(e){}
+  cloudRenderAccount();
+}
+async function cloudPull(){
+  const c=sbClient(); if(!c||!_sbUser) return null;
+  try{
+    const { data, error } = await c.from('states').select('data,updated_at').eq('user_id', _sbUser.id).maybeSingle();
+    if(error) return null;
+    return data;
+  }catch(e){ return null; }
+}
+async function cloudPush(){
+  const c=sbClient(); if(!c||!_sbUser) return;
+  try{
+    cloudStatus(t('cl_saving'));
+    const { error } = await c.from('states').upsert({ user_id:_sbUser.id, data:state, updated_at:new Date().toISOString() });
+    cloudStatus(error? t('cl_save_fail') : t('cl_saved'), error?'bad':'ok');
+  }catch(e){ cloudStatus(t('cl_save_fail'),'bad'); }
+}
+function cloudPushDebounced(){
+  if(!_sbUser || !sbConfigured()) return;
+  clearTimeout(_sbPushT); _sbPushT=setTimeout(cloudPush, 2000);
+}
+async function cloudOnLogin(){
+  const row = await cloudPull();
+  const cloudData = row && row.data;
+  if(!cloudDataHas(cloudData)){
+    await cloudPush(); cloudStatus(t('cl_synced'),'ok');
+  } else if(!cloudHasLocalData()){
+    cloudLoadInto(cloudData); cloudStatus(t('cl_loaded'),'ok');
+    if(typeof currentPage!=='undefined') go(currentPage); return;
+  } else {
+    cloudConflict(cloudData); return;
+  }
+  if(typeof currentPage!=='undefined') go(currentPage);
+}
+function cloudConflict(cloudData){
+  const box=document.getElementById('clConflict');
+  if(!box){ cloudLoadInto(cloudData); cloudStatus(t('cl_loaded'),'ok'); if(typeof currentPage!=='undefined') go(currentPage); return; }
+  box.innerHTML=`<div class="cl-conflict"><p>${t('cl_conflict')}</p><button class="btn btn-primary" id="clUseCloud">${t('cl_use_cloud')}</button> <button class="btn" id="clUseLocal">${t('cl_use_local')}</button></div>`;
+  const uc=document.getElementById('clUseCloud'), ul=document.getElementById('clUseLocal');
+  if(uc) uc.addEventListener('click',()=>{ box.innerHTML=''; cloudLoadInto(cloudData); cloudStatus(t('cl_loaded'),'ok'); if(typeof currentPage!=='undefined') go(currentPage); });
+  if(ul) ul.addEventListener('click',()=>{ box.innerHTML=''; cloudPush(); });
+}
+async function cloudSignUp(email, pass){
+  const c=sbClient(); if(!c) return;
+  cloudStatus(t('cl_working'));
+  try{
+    const { data, error } = await c.auth.signUp({ email, password:pass });
+    if(error){ cloudStatus(error.message||t('cl_auth_fail'),'bad'); return; }
+    if(data && data.session){ _sbUser=data.user; cloudRenderAccount(); await cloudOnLogin(); }
+    else { cloudStatus(t('cl_check_email'),'ok'); }
+  }catch(e){ cloudStatus(t('cl_auth_fail'),'bad'); }
+}
+async function cloudSignIn(email, pass){
+  const c=sbClient(); if(!c) return;
+  cloudStatus(t('cl_working'));
+  try{
+    const { data, error } = await c.auth.signInWithPassword({ email, password:pass });
+    if(error){ cloudStatus(error.message||t('cl_auth_fail'),'bad'); return; }
+    _sbUser=data.user; cloudRenderAccount(); await cloudOnLogin();
+  }catch(e){ cloudStatus(t('cl_auth_fail'),'bad'); }
+}
+async function cloudSignOut(){
+  const c=sbClient(); if(!c) return;
+  try{ await c.auth.signOut(); }catch(e){}
+  _sbUser=null; cloudRenderAccount(); cloudStatus(t('cl_signed_out'));
+}
+function cloudAccountHTML(){
+  if(!sbConfigured()){
+    return `<div class="card" style="margin-bottom:18px"><div class="card-title">☁️ ${t('cl_title')}</div><div class="card-sub">${t('cl_not_configured')}</div></div>`;
+  }
+  if(_sbUser){
+    return `<div class="card" style="margin-bottom:18px">
+      <div class="card-title">☁️ ${t('cl_title')}</div>
+      <div class="card-sub">${t('cl_logged_as')} <b>${esc(_sbUser.email||'')}</b></div>
+      <div class="cl-status" id="clStatus"></div>
+      <div id="clConflict"></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px">
+        <button class="btn" id="clSyncNow">${t('cl_sync_now')}</button>
+        <button class="btn btn-ghost" id="clSignOut">${t('cl_signout')}</button>
+      </div>
+    </div>`;
+  }
+  return `<div class="card" style="margin-bottom:18px">
+    <div class="card-title">☁️ ${t('cl_title')}</div>
+    <div class="card-sub">${t('cl_sub')}</div>
+    <div class="cl-form">
+      <input id="clEmail" type="email" placeholder="${esc(t('cl_email'))}" autocomplete="email">
+      <input id="clPass" type="password" placeholder="${esc(t('cl_pass'))}" autocomplete="current-password">
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px">
+      <button class="btn btn-primary" id="clSignIn">${t('cl_signin')}</button>
+      <button class="btn" id="clSignUp">${t('cl_signup')}</button>
+    </div>
+    <div class="cl-status" id="clStatus"></div>
+  </div>`;
+}
+function cloudRenderAccount(){
+  const slot=document.getElementById('clAccount'); if(!slot) return;
+  slot.innerHTML=cloudAccountHTML();
+  _sbStatusEl=document.getElementById('clStatus');
+  bindCloudAccount();
+}
+function bindCloudAccount(){
+  const si=document.getElementById('clSignIn'), su=document.getElementById('clSignUp'),
+        so=document.getElementById('clSignOut'), sn=document.getElementById('clSyncNow');
+  const getE=()=> ((document.getElementById('clEmail')||{}).value||'').trim();
+  const getP=()=> (document.getElementById('clPass')||{}).value||'';
+  if(si) si.addEventListener('click',()=>{ const e=getE(),p=getP(); if(!e||!p){ cloudStatus(t('cl_need_fields'),'bad'); return; } cloudSignIn(e,p); });
+  if(su) su.addEventListener('click',()=>{ const e=getE(),p=getP(); if(!e||p.length<6){ cloudStatus(t('cl_need_fields6'),'bad'); return; } cloudSignUp(e,p); });
+  if(so) so.addEventListener('click',cloudSignOut);
+  if(sn) sn.addEventListener('click',cloudPush);
+}
 // dynamic tables for priceState (items/labor)
 function bindDynTable(sel,arrKey,store,onChange){
   $(sel).querySelectorAll('tbody tr').forEach(tr=>{
@@ -16102,6 +16248,30 @@ Object.assign(I18N, {
   cx_import_empty:{fr:"Fichier vide ou illisible.",en:"Empty or unreadable file.",ar:"ملف فارغ أو غير قابل للقراءة."},
   cx_import_error:{fr:"Impossible de lire ce fichier.",en:"Couldn't read this file.",ar:"تعذّرت قراءة هذا الملف."},
   cx_imported_n:{fr:"✅ {n} ligne(s) importée(s).",en:"✅ {n} row(s) imported.",ar:"✅ تم استيراد {n} صف."},
+  cl_title:{fr:"Compte en ligne (sauvegarde cloud)",en:"Online account (cloud backup)",ar:"حساب عبر الإنترنت (نسخ سحابي)"},
+  cl_sub:{fr:"Crée un compte pour sauvegarder tes données et les retrouver sur tous tes appareils. Gratuit.",en:"Create an account to back up your data and access it on all your devices. Free.",ar:"أنشئ حسابًا لحفظ بياناتك والوصول إليها من جميع أجهزتك. مجانًا."},
+  cl_not_configured:{fr:"Bientôt disponible (à configurer par l'administrateur).",en:"Coming soon (to be configured by the administrator).",ar:"قريبًا (يتم إعداده من قبل المسؤول)."},
+  cl_email:{fr:"Email",en:"Email",ar:"البريد الإلكتروني"},
+  cl_pass:{fr:"Mot de passe",en:"Password",ar:"كلمة المرور"},
+  cl_signin:{fr:"Se connecter",en:"Sign in",ar:"تسجيل الدخول"},
+  cl_signup:{fr:"Créer un compte",en:"Create account",ar:"إنشاء حساب"},
+  cl_signout:{fr:"Se déconnecter",en:"Sign out",ar:"تسجيل الخروج"},
+  cl_logged_as:{fr:"Connecté en tant que",en:"Signed in as",ar:"مسجّل الدخول باسم"},
+  cl_sync_now:{fr:"Synchroniser maintenant",en:"Sync now",ar:"المزامنة الآن"},
+  cl_working:{fr:"Veuillez patienter…",en:"Please wait…",ar:"يرجى الانتظار…"},
+  cl_check_email:{fr:"✅ Compte créé ! Vérifie ta boîte mail pour confirmer ton inscription, puis connecte-toi.",en:"✅ Account created! Check your inbox to confirm your sign-up, then sign in.",ar:"✅ تم إنشاء الحساب! تحقق من بريدك لتأكيد التسجيل، ثم سجّل الدخول."},
+  cl_auth_fail:{fr:"Échec de connexion. Vérifie tes identifiants (et confirme ton email).",en:"Sign-in failed. Check your credentials (and confirm your email).",ar:"فشل تسجيل الدخول. تحقق من بياناتك (وأكّد بريدك)."},
+  cl_need_fields:{fr:"Entre ton email et ton mot de passe.",en:"Enter your email and password.",ar:"أدخل بريدك وكلمة المرور."},
+  cl_need_fields6:{fr:"Email + mot de passe (6 caractères minimum).",en:"Email + password (6 characters minimum).",ar:"البريد + كلمة المرور (6 أحرف على الأقل)."},
+  cl_saving:{fr:"Sauvegarde…",en:"Saving…",ar:"جارٍ الحفظ…"},
+  cl_saved:{fr:"✅ Sauvegardé dans le cloud",en:"✅ Saved to the cloud",ar:"✅ تم الحفظ في السحابة"},
+  cl_save_fail:{fr:"Sauvegarde cloud impossible (hors-ligne ?).",en:"Cloud save failed (offline?).",ar:"تعذّر الحفظ السحابي (غير متصل؟)."},
+  cl_synced:{fr:"✅ Synchronisé",en:"✅ Synced",ar:"✅ تمت المزامنة"},
+  cl_loaded:{fr:"✅ Données chargées depuis le cloud",en:"✅ Data loaded from the cloud",ar:"✅ تم تحميل البيانات من السحابة"},
+  cl_signed_out:{fr:"Déconnecté.",en:"Signed out.",ar:"تم تسجيل الخروج."},
+  cl_conflict:{fr:"Des données existent ici ET dans le cloud. Lesquelles garder ?",en:"Data exists here AND in the cloud. Which to keep?",ar:"توجد بيانات هنا وفي السحابة. أيّها تحتفظ؟"},
+  cl_use_cloud:{fr:"Garder le cloud",en:"Keep the cloud",ar:"الاحتفاظ بالسحابة"},
+  cl_use_local:{fr:"Garder cet appareil",en:"Keep this device",ar:"الاحتفاظ بهذا الجهاز"},
   ai_smart_premium:{fr:"🔒 Premium requis",en:"🔒 Premium required",ar:"🔒 يتطلب بريميوم"},
   ai_smart_desc_premium:{fr:"L'IA en ligne est incluse dans Premium (rien à configurer). Active ton abonnement pour en profiter. L'analyse locale reste gratuite.",en:"Online AI is included with Premium (nothing to set up). Activate your subscription to use it. Local analysis stays free.",ar:"الذكاء الاصطناعي عبر الإنترنت مُضمَّن في بريميوم (دون إعداد). فعّل اشتراكك للاستفادة. يبقى التحليل المحلي مجانيًا."},
 });
@@ -16111,6 +16281,8 @@ const PB_LICENSE_FN = '/.netlify/functions/verify-license';
 const PB_AI_FN      = '/.netlify/functions/ai';
 const PB_SEARCH_FN  = '/.netlify/functions/search';
 const PB_CHARIOW_FN = '/.netlify/functions/chariow-sync';
+let   SUPABASE_URL      = 'https://mktaambfgzdmbwstcjiz.supabase.co';
+let   SUPABASE_ANON_KEY = 'sb_publishable_rHvA3ftBARCB5Tk9VAW_kg_ddb3g9LT';
 let   PB_CHECKOUT_URL = 'https://vwspsose.mychariow.shop/prd_qp1e5dv4';
 let   PB_PRICE_LABEL  = '3 000 FCFA / mois';
 
@@ -16700,7 +16872,7 @@ applyI18n();
 initLangPicker();
 applyDarkMode();
 const _tg=document.getElementById('themeToggle'); if(_tg) _tg.addEventListener('click',toggleDarkMode);
-pbUpdateBadge(); pbReverify(); pbAutoActivateFromURL();
+pbUpdateBadge(); pbReverify(); pbAutoActivateFromURL(); cloudInit();
 const navIc=document.getElementById('aiNavIcon'); if(navIc) navIc.innerHTML=aiIcon('accent');
 initScrollNav();
 initLock();
