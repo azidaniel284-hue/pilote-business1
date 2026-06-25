@@ -1,0 +1,7 @@
+# Configuration Netlify — site statique (1 fichier) + 2 fonctions serverless
+[build]
+  publish = "."
+  functions = "netlify/functions"
+
+# Les variables secrètes (CHARIOW_API_KEY, GROQ_API_KEY) NE sont PAS ici :
+# on les définit dans Netlify → Site settings → Environment variables.
