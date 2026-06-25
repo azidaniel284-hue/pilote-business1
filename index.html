@@ -585,6 +585,13 @@ table.inv-table tbody td{padding:11px 13px;border-bottom:1px solid #EFE4EB;font-
 .pb-fullscreen{display:inline-flex;align-items:center;gap:6px;margin-top:10px;font-size:12.5px;font-weight:600;color:var(--rose-d);background:none;border:none;cursor:pointer;text-decoration:underline;padding:0}
 .pb-after{font-size:12.5px;color:var(--ink-soft);text-align:left;margin:16px 0 9px;line-height:1.5;font-weight:500}
 @media(max-width:640px){.pb-card.pb-wide{max-width:440px}.pb-frame-wrap iframe{height:68vh;min-height:380px}}
+.bp-agent .ai-chat{max-height:380px;overflow-y:auto;padding:6px 2px;margin-top:8px}
+.bp-agent .ai-bar.bpa-bar{position:static;margin-top:10px}
+.bpa-web{font-size:16px;background:var(--rose-xl);border:1px solid var(--rose-l);color:var(--rose-d);opacity:.55;transition:opacity .15s,background .15s,color .15s}
+.bpa-web.on{opacity:1;background:var(--grad-brand);color:#fff;border-color:transparent}
+.bpa-src{margin-top:9px;padding-top:8px;border-top:1px dashed var(--glass-border);font-size:11.5px;color:var(--ink-soft);line-height:1.6}
+.bpa-src b{display:block;margin-bottom:3px;color:var(--ink)}
+.bpa-src a{color:var(--rose-d);text-decoration:underline}
 .pb-locked{max-width:460px;margin:40px auto;text-align:center;background:var(--surface);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:24px;box-shadow:var(--shadow);padding:40px 30px;animation:rise .5s ease both}
 .pb-lock-ic{width:70px;height:70px;border-radius:20px;margin:0 auto 18px;background:var(--rose-l);display:grid;place-items:center;font-size:32px}
 .pb-locked h2{font-family:'Fraunces',serif;font-size:22px;font-weight:700;color:var(--ink);margin-bottom:8px}
@@ -14258,8 +14265,8 @@ function openInvoice(id){
   const doc = `
   <div class="inv-toolbar">
     <button class="btn" id="invClose">${t('inv_close')}</button>
-    <button class="btn" id="invPrint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z"/></svg>${t('inv_print')}</button>
-    <button class="btn btn-primary" id="invPdf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>${t('inv_pdf')}</button>
+    <button class="btn" id="invPrint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z"/></svg>${t('inv_print')}${isPremium()?'':' 🔒'}</button>
+    <button class="btn btn-primary" id="invPdf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>${t('inv_pdf')}${isPremium()?'':' 🔒'}</button>
   </div>
   <div class="inv-doc" id="invDoc">
     <div class="inv-head">
@@ -14322,8 +14329,8 @@ function openInvoice(id){
 
   // bindings
   document.getElementById('invClose').addEventListener('click', closeInvoice);
-  document.getElementById('invPrint').addEventListener('click', ()=>window.print());
-  document.getElementById('invPdf').addEventListener('click', ()=>invoiceToPDF(f));
+  document.getElementById('invPrint').addEventListener('click', ()=>{ if(!pbRequire()) return; window.print(); });
+  document.getElementById('invPdf').addEventListener('click', ()=>{ if(!pbRequire()) return; invoiceToPDF(f); });
   ov.addEventListener('click', e=>{ if(e.target===ov) closeInvoice(); });
 }
 
@@ -14404,8 +14411,8 @@ function openOrder(id){
   const doc = `
   <div class="inv-toolbar">
     <button class="btn" id="invClose">${t('inv_close')}</button>
-    <button class="btn" id="invPrint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z"/></svg>${t('inv_print')}</button>
-    <button class="btn btn-primary" id="invPdf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>${t('inv_pdf')}</button>
+    <button class="btn" id="invPrint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z"/></svg>${t('inv_print')}${isPremium()?'':' 🔒'}</button>
+    <button class="btn btn-primary" id="invPdf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>${t('inv_pdf')}${isPremium()?'':' 🔒'}</button>
   </div>
   <div class="inv-doc" id="invDoc">
     <div class="inv-head">
@@ -14458,8 +14465,8 @@ function openOrder(id){
   ov.classList.add('show');
   document.body.style.overflow='hidden';
   document.getElementById('invClose').addEventListener('click', closeInvoice);
-  document.getElementById('invPrint').addEventListener('click', ()=>window.print());
-  document.getElementById('invPdf').addEventListener('click', ()=>invoiceToPDF({num:c.num||'commande'}));
+  document.getElementById('invPrint').addEventListener('click', ()=>{ if(!pbRequire()) return; window.print(); });
+  document.getElementById('invPdf').addEventListener('click', ()=>{ if(!pbRequire()) return; invoiceToPDF({num:c.num||'commande'}); });
   ov.addEventListener('click', e=>{ if(e.target===ov) closeInvoice(); });
 }
 
@@ -15211,6 +15218,19 @@ function renderBizplan(){
       <div class="price-line"><span class="k">${t('bp_net_y2')}</span><span class="v" id="bpRes2">${FCFA(res('a2'))}</span></div>
       <div class="price-line"><span class="k">${t('bp_net_y3')}</span><span class="v" id="bpRes3" style="color:var(--vert);font-size:17px">${FCFA(res('a3'))}</span></div>
     </div></div>
+  </div>
+  <div class="card section-gap bp-agent">
+    <div class="card-title">🤖 ${t('bpa_title')}</div>
+    <div class="card-sub">${t('bpa_sub')}</div>
+    <div class="ai-suggest" id="bpaSuggest">
+      ${['bpa_chip_ideas','bpa_chip_compet','bpa_chip_value','bpa_chip_trends','bpa_chip_price'].map(k=>`<button class="ai-chip" data-q="${esc(t(k))}">${esc(t(k))}</button>`).join('')}
+    </div>
+    <div class="ai-chat" id="bpaChat"></div>
+    <div class="ai-bar bpa-bar">
+      <button class="ai-mic bpa-web on" id="bpaWeb" title="${esc(t('bpa_web_title'))}" aria-pressed="true">🔎</button>
+      <textarea id="bpaInput" placeholder="${esc(t('bpa_ph'))}" rows="1"></textarea>
+      <button class="ai-send" id="bpaSend" title="${esc(t('ai_save'))}"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></button>
+    </div>
   </div>`;
 }
 function bpRow(r,i){
@@ -15367,7 +15387,7 @@ function bindPage(page){
     bf('#bpMission','mission');bf('#bpCible','cible');bf('#bpCanaux','canaux');
     bf('#bpForces','forces');bf('#bpFaiblesses','faiblesses');bf('#bpOpportunites','opportunites');bf('#bpMenaces','menaces');
     pg.querySelector('[data-addbp]').addEventListener('click',()=>{state.bizplan.prev.push({poste:'Nouvelle charge',a1:0,a2:0,a3:0});fillBizplan();recalcBizplan();save();bindBp();});
-    bindBp();
+    bindBp(); bindBpAgent();
   }
   if(page==='assistant'){ bindAssistant(); }
   if(page==='sync'){ bindSync(); }
@@ -15380,6 +15400,74 @@ function bindBp(){
       state.bizplan.prev[i][inp.dataset.f]=inp.dataset.f==='poste'?inp.value:num(inp.value); recalcBizplan(); save();
     }));
   });
+}
+
+/* ===== Agent IA Business Plan : recherche web (Tavily) + conseils marketing ===== */
+let bpAgentHistory = [];
+function bpAgentRenderChat(){
+  const box=document.getElementById('bpaChat'); if(!box) return;
+  if(bpAgentHistory.length===0){
+    box.innerHTML=`<div class="ai-msg bot"><div class="ai-av bot">${aiIcon()}</div><div class="ai-bubble">${t('bpa_greeting')}</div></div>`;
+    return;
+  }
+  box.innerHTML=bpAgentHistory.map(m=> m.role==='user'
+    ? `<div class="ai-msg user"><div class="ai-av me">🧑</div><div class="ai-bubble">${esc(m.text)}</div></div>`
+    : `<div class="ai-msg bot"><div class="ai-av bot">${aiIcon()}</div><div class="ai-bubble">${m.text}${m.sources||''}</div></div>`
+  ).join('');
+  box.scrollTop=box.scrollHeight;
+}
+function bpAgentTyping(on){
+  const box=document.getElementById('bpaChat'); if(!box) return;
+  if(on){ box.insertAdjacentHTML('beforeend',`<div class="ai-msg bot" id="bpaTyping"><div class="ai-av bot">${aiIcon()}</div><div class="ai-bubble"><div class="ai-typing"><span></span><span></span><span></span></div></div></div>`); box.scrollTop=box.scrollHeight; }
+  else { const x=document.getElementById('bpaTyping'); if(x) x.remove(); }
+}
+async function bpAgentSearch(query){
+  try{
+    const p=pbPremium();
+    const res=await fetch(PB_SEARCH_FN,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({license:(p&&p.key)||'', query})});
+    if(!res.ok) return null;
+    return await res.json();
+  }catch(e){ return null; }
+}
+async function bpAgentAsk(question){
+  question=(question||'').trim(); if(!question) return;
+  if(!isPremium() && !(state.settings && state.settings.aiKey)){ pbOpenModal(); return; }
+  bpAgentHistory.push({role:'user',text:question});
+  bpAgentRenderChat();
+  const input=document.getElementById('bpaInput'); if(input){ input.value=''; input.style.height='auto'; }
+  bpAgentTyping(true);
+  const webBtn=document.getElementById('bpaWeb');
+  const webOn=!!(webBtn && webBtn.classList.contains('on'));
+  const b=state.bizplan;
+  let webBlock='', sourcesHTML='';
+  if(webOn){
+    const web=await bpAgentSearch(question+(b.secteur?(' '+b.secteur):'')+(b.zone?(' '+b.zone):''));
+    if(web && Array.isArray(web.results) && web.results.length){
+      const top=web.results.slice(0,5);
+      webBlock='\n=== RÉSULTATS WEB (cite-les en [1],[2]… avec le titre) ===\n'+top.map((r,i)=>`[${i+1}] ${r.title} — ${r.url}\n${String(r.content||'').slice(0,500)}`).join('\n\n');
+      sourcesHTML=`<div class="bpa-src"><b>${t('bpa_sources')}</b>`+top.map((r,i)=>`[${i+1}] <a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.title||r.url)}</a>`).join('<br>')+`</div>`;
+    }
+  }
+  const bpCtx=[b.projet&&`Projet: ${b.projet}`,b.secteur&&`Secteur: ${b.secteur}`,b.zone&&`Zone: ${b.zone}`,b.cible&&`Cible: ${b.cible}`,b.canaux&&`Canaux: ${b.canaux}`,b.mission&&`Mission: ${b.mission}`].filter(Boolean).join('\n');
+  const sys=`You are an expert business strategist and marketing advisor acting as the entrepreneur's AI agent. Reply ONLY in ${aiLangName()}, concrete and actionable (short paragraphs and bullet points). Propose real marketing ideas, channels, positioning, pricing and business-plan content tailored to the data below. ${webBlock?'Use the WEB RESULTS for current facts and CITE sources as [1],[2]…; never invent sources.':'No live web data this turn — answer from your knowledge and the company data, and flag anything that may be outdated.'}\n\n=== DONNÉES ENTREPRISE ===\n${aiBuildContext()}\n=== BUSINESS PLAN ===\n${bpCtx||'(vide)'}${webBlock}`;
+  const msgs=[{role:'system',content:sys}, ...bpAgentHistory.slice(-7).map(m=>({role:m.role==='user'?'user':'assistant',content:String(m.text||'').replace(/<[^>]+>/g,'')}))];
+  let answer;
+  try{ answer=esc(String(await aiChatComplete(msgs,{temperature:0.6,max_tokens:800})||t('air_api_empty'))).replace(/\n/g,'<br>'); }
+  catch(e){ answer=t('air_api_error'); sourcesHTML=''; }
+  bpAgentTyping(false);
+  bpAgentHistory.push({role:'bot',text:answer,sources:sourcesHTML});
+  bpAgentRenderChat();
+}
+function bindBpAgent(){
+  const send=document.getElementById('bpaSend'), input=document.getElementById('bpaInput'), web=document.getElementById('bpaWeb'), sg=document.getElementById('bpaSuggest');
+  bpAgentRenderChat();
+  if(send) send.addEventListener('click',()=>bpAgentAsk(input?input.value:''));
+  if(input){
+    input.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); bpAgentAsk(input.value); } });
+    input.addEventListener('input',()=>{ input.style.height='auto'; input.style.height=Math.min(input.scrollHeight,140)+'px'; });
+  }
+  if(web) web.addEventListener('click',()=>{ const on=web.classList.toggle('on'); web.setAttribute('aria-pressed',on?'true':'false'); });
+  if(sg) sg.querySelectorAll('.ai-chip').forEach(ch=>ch.addEventListener('click',()=>bpAgentAsk(ch.dataset.q)));
 }
 // dynamic tables for priceState (items/labor)
 function bindDynTable(sel,arrKey,store,onChange){
@@ -15797,6 +15885,17 @@ Object.assign(I18N, {
   pb_expires_on:{fr:"expire le",en:"expires on",ar:"ينتهي في"},
   pb_auto_activating:{fr:"Activation de ta clé…",en:"Activating your key…",ar:"جارٍ تفعيل مفتاحك…"},
   pb_active_expired:{fr:"Cet abonnement a expiré. Renouvelle pour réactiver Premium.",en:"This subscription has expired. Renew to reactivate Premium.",ar:"انتهى هذا الاشتراك. جدّد لإعادة تفعيل بريميوم."},
+  bpa_title:{fr:"Agent IA — Business & Marketing",en:"AI Agent — Business & Marketing",ar:"وكيل الذكاء الاصطناعي — الأعمال والتسويق"},
+  bpa_sub:{fr:"Cherche le web en direct, propose des idées marketing et t'aide à rédiger ton business plan.",en:"Searches the live web, suggests marketing ideas and helps you write your business plan.",ar:"يبحث في الويب مباشرةً، يقترح أفكارًا تسويقية ويساعدك في كتابة خطة عملك."},
+  bpa_greeting:{fr:"Bonjour 👋 Je suis ton agent business. Demande-moi des idées marketing, une analyse de la concurrence, les tendances du marché, ou de l'aide pour ton business plan. La recherche web 🔎 est activée pour des infos à jour.",en:"Hi 👋 I'm your business agent. Ask me for marketing ideas, competitor analysis, market trends, or help with your business plan. Web search 🔎 is on for up-to-date info.",ar:"مرحبًا 👋 أنا وكيل أعمالك. اسألني عن أفكار تسويقية، تحليل المنافسين، اتجاهات السوق، أو مساعدة في خطة عملك. البحث على الويب 🔎 مُفعّل للحصول على معلومات حديثة."},
+  bpa_ph:{fr:"Demande des idées marketing, une analyse, une recherche…",en:"Ask for marketing ideas, analysis, research…",ar:"اطلب أفكارًا تسويقية، تحليلًا، بحثًا…"},
+  bpa_web_title:{fr:"Recherche web (activer / désactiver)",en:"Web search (toggle on / off)",ar:"البحث على الويب (تشغيل / إيقاف)"},
+  bpa_sources:{fr:"Sources :",en:"Sources:",ar:"المصادر:"},
+  bpa_chip_ideas:{fr:"Idées marketing",en:"Marketing ideas",ar:"أفكار تسويقية"},
+  bpa_chip_compet:{fr:"Analyse de la concurrence",en:"Competitor analysis",ar:"تحليل المنافسين"},
+  bpa_chip_value:{fr:"Rédige ma proposition de valeur",en:"Write my value proposition",ar:"اكتب عرض القيمة الخاص بي"},
+  bpa_chip_trends:{fr:"Tendances du marché",en:"Market trends",ar:"اتجاهات السوق"},
+  bpa_chip_price:{fr:"Stratégie de prix",en:"Pricing strategy",ar:"استراتيجية التسعير"},
   ai_smart_premium:{fr:"🔒 Premium requis",en:"🔒 Premium required",ar:"🔒 يتطلب بريميوم"},
   ai_smart_desc_premium:{fr:"L'IA en ligne est incluse dans Premium (rien à configurer). Active ton abonnement pour en profiter. L'analyse locale reste gratuite.",en:"Online AI is included with Premium (nothing to set up). Activate your subscription to use it. Local analysis stays free.",ar:"الذكاء الاصطناعي عبر الإنترنت مُضمَّن في بريميوم (دون إعداد). فعّل اشتراكك للاستفادة. يبقى التحليل المحلي مجانيًا."},
 });
@@ -15804,6 +15903,7 @@ Object.assign(I18N, {
 // ----- Config (à renseigner par le propriétaire après création du produit Chariow) -----
 const PB_LICENSE_FN = '/.netlify/functions/verify-license';
 const PB_AI_FN      = '/.netlify/functions/ai';
+const PB_SEARCH_FN  = '/.netlify/functions/search';
 let   PB_CHECKOUT_URL = 'https://vwspsose.mychariow.shop/prd_qp1e5dv4';
 let   PB_PRICE_LABEL  = '3 000 FCFA / mois';
 
