@@ -30,7 +30,11 @@ exports.handler = async (event) => {
     const d = await r.json();
     // L'API peut renvoyer la licence directement ou dans { data: {...} } / { license: {...} }
     const lic = d.data || d.license || d || {};
-    const active = lic.is_active === true || lic.status === 'active';
+    const st = String(lic.status || '').toLowerCase();
+    // Premium accordé si la licence est payée et ni expirée ni révoquée
+    // (on accepte 'active' ET 'pending_activation' — clé pas encore activée sur un appareil).
+    const active = (lic.is_active === true || st === 'active' || st === 'pending_activation')
+                   && lic.is_expired !== true && st !== 'revoked' && st !== 'expired';
     const expires = lic.expires_at || lic.expiry || lic.renews_at || lic.expiration || null;
 
     return reply({ active, status: lic.status || (active ? 'active' : 'inactive'), expires });

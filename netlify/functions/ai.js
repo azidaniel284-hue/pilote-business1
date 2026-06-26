@@ -13,7 +13,8 @@ async function licenseActive(key) {
     if (!r.ok) return false;
     const d = await r.json();
     const lic = d.data || d.license || d || {};
-    return lic.is_active === true || lic.status === 'active';
+    const st = String(lic.status || '').toLowerCase();
+    return (lic.is_active === true || st === 'active' || st === 'pending_activation') && lic.is_expired !== true && st !== 'revoked' && st !== 'expired';
   } catch (e) { return false; }
 }
 
