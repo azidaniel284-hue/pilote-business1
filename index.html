@@ -717,7 +717,6 @@ html[dir=rtl] .ai-msg.bot{flex-direction:row-reverse}
     <button class="cover-enter" id="coverEnter">Entrer dans mon espace
       <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
     </button>
-    <div class="cover-edit">Tu vends cette application ? <button id="coverEditBtn">Personnaliser le nom et le slogan</button></div>
     <div class="cover-form" id="coverForm">
       <div class="field"><label>Logo (optionnel)</label>
         <label class="btn" style="cursor:pointer;width:100%;justify-content:center">
@@ -15934,7 +15933,8 @@ function initCover(){
   const cover=$('#cover');
   $('#coverEnter').addEventListener('click',()=>{ cover.classList.add('hide'); });
   // édition marque/slogan
-  $('#coverEditBtn').addEventListener('click',()=>{
+  const _coverEdit=$('#coverEditBtn');
+  if(_coverEdit) _coverEdit.addEventListener('click',()=>{
     const f=$('#coverForm'); f.classList.toggle('show');
     if(f.classList.contains('show')){
       $('#coverBrandInput').value=state.settings.brand||'';
