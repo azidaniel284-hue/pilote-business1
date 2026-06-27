@@ -601,6 +601,40 @@ table.inv-table tbody td{padding:11px 13px;border-bottom:1px solid #EFE4EB;font-
 .cx-map-row{display:flex;align-items:center;gap:12px}
 .cx-map-row>span{flex:0 0 130px;font-size:13px;font-weight:600;color:var(--ink)}
 .cx-map-row>select{flex:1}
+.todo-card .card-title{margin-bottom:4px}
+.todo-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--glass-border)}
+.todo-row:last-child{border-bottom:none}
+.todo-ic{font-size:19px;width:24px;text-align:center;flex:0 0 auto}
+.todo-main{flex:1;display:flex;flex-direction:column;gap:3px;min-width:0}
+.todo-main b{font-size:14px;color:var(--ink);font-weight:600}
+.todo-meta{font-size:12.5px;color:var(--ink-soft)}
+.todo-pct{font-weight:700;color:var(--rose-d);font-size:14px;flex:0 0 auto}
+.todo-bar{height:7px;border-radius:6px;background:var(--rose-xl);overflow:hidden;margin-top:4px}
+.todo-bar>span{display:block;height:100%;background:var(--grad-brand);border-radius:6px}
+.todo-relances{display:flex;flex-direction:column;gap:6px;padding:2px 0 8px 36px}
+.todo-relance{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12.5px;color:var(--ink-soft)}
+.todo-relance>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.btn-wa{background:#25D366;color:#fff;border-color:transparent;flex:0 0 auto}
+.pb-trial-banner{background:linear-gradient(135deg,#FFF1F7,#FFE9D6);border:1px solid var(--rose-l);border-radius:12px;padding:9px 12px;font-size:12.5px;font-weight:600;color:var(--rose-d);margin-bottom:12px}
+.pb-trial-btn{width:100%;justify-content:center;margin-bottom:10px}
+.ref-card{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:linear-gradient(135deg,var(--rose-xl),rgba(245,179,1,.12))}
+.ref-emoji{font-size:30px;flex:0 0 auto}
+.ref-body{flex:1;min-width:160px}
+.ref-h{font-family:'Fraunces',serif;font-weight:700;font-size:16px;color:var(--ink)}
+.ref-s{font-size:12.5px;color:var(--ink-soft);margin-top:2px;line-height:1.4}
+.ref-btn{flex:0 0 auto}
+.tbl-search{width:100%;max-width:340px;margin-bottom:10px;border-radius:12px;padding:9px 13px;font-family:'Outfit';font-size:13.5px;background:var(--field-bg);border:1px solid var(--glass-border)}
+.tbl-search:focus{background:var(--card)}
+.pb-confetti{position:fixed;inset:0;pointer-events:none;z-index:900;overflow:hidden}
+.pb-confetti>i{position:absolute;top:-14px;width:9px;height:14px;border-radius:2px;opacity:.95;animation:pbfall 2.1s linear forwards}
+@keyframes pbfall{0%{transform:translateY(-10vh) rotate(0)}100%{transform:translateY(110vh) rotate(720deg)}}
+.empty-state{text-align:center;padding:26px 18px}
+.empty-state img{width:150px;max-width:55%;height:auto;margin:0 auto 12px;display:block;opacity:.96}
+.empty-state p{font-size:14px;color:var(--ink-soft);max-width:320px;margin:0 auto;line-height:1.5}
+.hero-illus{width:100%;height:200px;border-radius:18px;overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow)}
+.hero-illus img{width:100%;height:100%;object-fit:cover;display:block;animation:heroKen 22s ease-in-out infinite alternate}
+@keyframes heroKen{0%{transform:scale(1.03)}100%{transform:scale(1.12) translate(-1.5%,-2.5%)}}
+@media(prefers-reduced-motion:reduce){.hero-illus img{animation:none}}
 .cl-status{font-size:12.5px;font-weight:600;color:var(--ink-soft);min-height:16px;margin-top:8px}
 .cl-status.ok{color:#16A37B}
 .cl-status.bad{color:var(--rouge)}
@@ -1080,6 +1114,47 @@ $('#topActions').addEventListener('click',e=>{
 /* ============================================================
    ACCUEIL
    ============================================================ */
+const PB_HEROS=[
+  'https://d8j0ntlcm91z4.cloudfront.net/user_3FDy0whOBBaHe2Y7KiJ9Tc3flSi/hf_20260627_162148_f4263353-c37f-46df-859f-527d9af67e24_min.webp',
+  'https://d8j0ntlcm91z4.cloudfront.net/user_3FDy0whOBBaHe2Y7KiJ9Tc3flSi/hf_20260627_162148_aa5340c0-698c-4a93-ae0f-73bd7fead3ea_min.webp',
+  'https://d8j0ntlcm91z4.cloudfront.net/user_3FDy0whOBBaHe2Y7KiJ9Tc3flSi/hf_20260627_162151_a601fb37-333e-420f-8622-70a41589699e_min.webp',
+  'https://d8j0ntlcm91z4.cloudfront.net/user_3FDy0whOBBaHe2Y7KiJ9Tc3flSi/hf_20260627_162151_c4b43f57-c684-47de-9098-200b3ca80d64_min.webp'
+];
+let _pbHeroLast=-1;
+function pbPickHero(){ if(!PB_HEROS.length) return ''; let i=Math.floor(Math.random()*PB_HEROS.length); if(PB_HEROS.length>1 && i===_pbHeroLast) i=(i+1)%PB_HEROS.length; _pbHeroLast=i; return PB_HEROS[i]; }
+const PB_EMPTY_IMG='https://d8j0ntlcm91z4.cloudfront.net/user_3FDy0whOBBaHe2Y7KiJ9Tc3flSi/hf_20260627_102254_27b01e5c-5085-431d-9779-b52ee8f12180_min.webp';
+function emptyStateHTML(){ return `<div class="empty-state"><img src="${PB_EMPTY_IMG}" alt="" loading="lazy"><p>${t('empty_hint')}</p></div>`; }
+function todoWidgetHTML(){
+  const unpaidStatuts=['Impayée','En attente','Partiellement payée'];
+  const unpaid=state.factures.filter(f=>unpaidStatuts.includes(f.statut));
+  const unpaidTotal=unpaid.reduce((s,f)=>s+num(f.qte)*num(f.pu),0);
+  const orders=state.commandes.filter(c=>c.statut==='En préparation'||c.statut==='Expédiée');
+  const ca=totalRecettesTTC(); const obj=num(state.settings.objectif);
+  const pct=obj>0?Math.min(100,Math.round(ca/obj*100)):0;
+  const top=[...unpaid].sort((a,b)=>(num(b.qte)*num(b.pu))-(num(a.qte)*num(a.pu))).slice(0,3);
+  let rows='';
+  rows+=`<div class="todo-row"><span class="todo-ic">📄</span><div class="todo-main"><b>${t('todo_invoices')}</b><span class="todo-meta">${unpaid.length} · ${FCFA(unpaidTotal)}</span></div><button class="btn btn-sm" onclick="go('factures')">${t('todo_view')}</button></div>`;
+  if(top.length){
+    rows+=`<div class="todo-relances">`+top.map(f=>`<div class="todo-relance"><span>${esc(f.client||'—')} · ${esc(f.num||'')} · ${FCFA(num(f.qte)*num(f.pu))}</span><button class="btn btn-sm btn-wa" onclick="waRelance('${f.id}')">📲 ${t('todo_remind')}</button></div>`).join('')+`</div>`;
+  }
+  rows+=`<div class="todo-row"><span class="todo-ic">📦</span><div class="todo-main"><b>${t('todo_orders')}</b><span class="todo-meta">${orders.length}</span></div><button class="btn btn-sm" onclick="go('commandes')">${t('todo_view')}</button></div>`;
+  rows+=`<div class="todo-row"><span class="todo-ic">🎯</span><div class="todo-main"><b>${t('todo_objective')}</b><div class="todo-bar"><span style="width:${pct}%"></span></div></div><span class="todo-pct">${pct}%</span></div>`;
+  if(!_sbUser){
+    rows+=`<div class="todo-row"><span class="todo-ic">☁️</span><div class="todo-main"><b>${t('todo_backup')}</b></div><button class="btn btn-sm" onclick="go('sync')">${t('todo_backup_btn')}</button></div>`;
+  }
+  return `<div class="card todo-card" style="margin-bottom:18px"><div class="card-title">✅ ${t('todo_title')}</div>${rows}</div>`;
+}
+function waRelance(id){
+  const f=state.factures.find(x=>x.id===id); if(!f) return;
+  const montant=FCFA(num(f.qte)*num(f.pu));
+  const company=state.settings.company||state.settings.brand||'';
+  const txt=tf('wa_reminder',{client:(f.client||''),num:(f.num||''),montant:montant,company:company});
+  let phone='';
+  const c=state.clients.find(x=>x.nom && f.client && String(x.nom).trim().toLowerCase()===String(f.client).trim().toLowerCase());
+  if(c && c.tel) phone=String(c.tel).replace(/[^\d]/g,'');
+  const url = phone ? ('https://wa.me/'+phone+'?text='+encodeURIComponent(txt)) : ('https://wa.me/?text='+encodeURIComponent(txt));
+  window.open(url,'_blank','noopener');
+}
 function renderAccueil(){
   const tools = [
     ['finance','📊','var(--rose-l)',t('tile_dashboard'),t('tile_dashboard_d')],
@@ -1095,6 +1170,7 @@ function renderAccueil(){
   const dep = sum(state.depenses,'montant');
   return `
   <div class="welcome">
+    <div class="hero-illus"><img src="${pbPickHero()}" alt="" loading="lazy"></div>
     <div class="hero">
       <h2>${t('h_hello')}</h2>
       <p>${t('h_intro')}</p>
@@ -1104,6 +1180,12 @@ function renderAccueil(){
       <div class="kpi y"><div class="lbl">${t('kpi_expenses_total')}</div><div class="val">${FCFA(dep)}</div></div>
       <div class="kpi g"><div class="lbl">${t('kpi_profit')}</div><div class="val">${FCFA(ca-dep)}</div></div>
       <div class="kpi b"><div class="lbl">${t('kpi_contacts')}</div><div class="val">${state.clients.length+state.prospects.length}</div></div>
+    </div>
+    ${todoWidgetHTML()}
+    <div class="card ref-card" style="margin-bottom:18px">
+      <div class="ref-emoji">🎁</div>
+      <div class="ref-body"><div class="ref-h">${t('ref_title')}</div><div class="ref-s">${t('ref_sub')}</div></div>
+      <button class="btn btn-wa ref-btn" onclick="pbInvite()">📲 ${t('ref_invite')}</button>
     </div>
     <div class="card" style="margin-bottom:18px">
       <div class="card-title">⚙️ ${t('set_company')}</div>
@@ -1570,6 +1652,35 @@ const I18N = {
   sub_sync:{fr:"Transfère ton activité entre tes appareils",en:"Transfer your data between devices",ar:"انقل بياناتك بين أجهزتك"},
   nav_connexions:{fr:"Connexions",en:"Connections",ar:"الاتصالات"},
   sub_connexions:{fr:"Connecte tes comptes et collecte tes données",en:"Connect your accounts and collect your data",ar:"اربط حساباتك واجمع بياناتك"},
+  todo_title:{fr:"À faire",en:"To do",ar:"المهام"},
+  todo_invoices:{fr:"Factures à encaisser",en:"Invoices to collect",ar:"فواتير للتحصيل"},
+  todo_orders:{fr:"Commandes à traiter",en:"Orders to handle",ar:"طلبات قيد المعالجة"},
+  todo_objective:{fr:"Objectif annuel",en:"Annual goal",ar:"الهدف السنوي"},
+  todo_view:{fr:"Voir",en:"View",ar:"عرض"},
+  todo_remind:{fr:"Relancer",en:"Remind",ar:"تذكير"},
+  todo_backup:{fr:"Sauvegarde tes données en ligne",en:"Back up your data online",ar:"احفظ بياناتك على الإنترنت"},
+  todo_backup_btn:{fr:"Sauvegarder",en:"Back up",ar:"حفظ"},
+  wa_reminder:{fr:"Bonjour {client}, petit rappel concernant votre facture {num} d'un montant de {montant}. Merci de bien vouloir procéder au règlement dès que possible. {company}",en:"Hello {client}, a quick reminder about your invoice {num} for {montant}. Please proceed with the payment as soon as possible. {company}",ar:"مرحبًا {client}، تذكير بخصوص فاتورتك {num} بمبلغ {montant}. يُرجى السداد في أقرب وقت ممكن. {company}"},
+  pb_trial_btn:{fr:"Essayer Premium gratuitement (3 jours)",en:"Try Premium free (3 days)",ar:"جرّب بريميوم مجانًا (٣ أيام)"},
+  pb_trial_started:{fr:"🎁 Essai Premium activé pour 3 jours !",en:"🎁 Premium trial activated for 3 days!",ar:"🎁 تم تفعيل تجربة بريميوم لمدة ٣ أيام!"},
+  pb_trial_left:{fr:"Essai Premium : {n} jour(s) restant(s)",en:"Premium trial: {n} day(s) left",ar:"تجربة بريميوم: {n} يوم متبقٍ"},
+  ref_title:{fr:"Parraine un entrepreneur",en:"Refer an entrepreneur",ar:"ادعُ رائد أعمال"},
+  ref_sub:{fr:"Partage Pilote Business autour de toi — aide un ami à piloter son activité.",en:"Share Pilote Business around you — help a friend run their business.",ar:"شارك Pilote Business مع من حولك — ساعد صديقًا على إدارة نشاطه."},
+  ref_invite:{fr:"Inviter sur WhatsApp",en:"Invite on WhatsApp",ar:"دعوة عبر واتساب"},
+  ref_code:{fr:"Ton code",en:"Your code",ar:"رمزك"},
+  ref_msg:{fr:"Salut 👋 J'utilise Pilote Business pour gérer mon activité (ventes, factures, clients, IA…). Essaie-le gratuitement : {site} — mon code : {code}",en:"Hi 👋 I use Pilote Business to run my business (sales, invoices, clients, AI…). Try it free: {site} — my code: {code}",ar:"مرحبًا 👋 أستخدم Pilote Business لإدارة نشاطي. جرّبه مجانًا: {site} — رمزي: {code}"},
+  rc_btn:{fr:"Reçu",en:"Receipt",ar:"إيصال"},
+  rc_title:{fr:"REÇU DE PAIEMENT",en:"PAYMENT RECEIPT",ar:"إيصال دفع"},
+  rc_client:{fr:"Client",en:"Customer",ar:"العميل"},
+  rc_ref:{fr:"Référence",en:"Reference",ar:"المرجع"},
+  rc_date:{fr:"Date",en:"Date",ar:"التاريخ"},
+  rc_amount:{fr:"Montant payé",en:"Amount paid",ar:"المبلغ المدفوع"},
+  rc_thanks:{fr:"Merci pour votre confiance !",en:"Thank you for your trust!",ar:"شكرًا لثقتكم!"},
+  rc_footer:{fr:"Généré avec",en:"Generated with",ar:"أُنشئ بواسطة"},
+  rc_saved:{fr:"✅ Reçu enregistré",en:"✅ Receipt saved",ar:"✅ تم حفظ الإيصال"},
+  rc_fail:{fr:"Impossible de générer le reçu.",en:"Couldn't generate the receipt.",ar:"تعذّر إنشاء الإيصال."},
+  search_ph:{fr:"🔍 Rechercher…",en:"🔍 Search…",ar:"🔍 بحث…"},
+  empty_hint:{fr:"C'est encore vide ici — ajoute ta première ligne pour démarrer 🚀",en:"It's empty here — add your first entry to get started 🚀",ar:"المكان فارغ هنا — أضف أول إدخال للبدء 🚀"},
   sync_intro:{fr:"Transfère toutes tes données (recettes, factures, clients, réglages…) d'un appareil à un autre — par exemple de ton ordinateur vers ton téléphone.",en:"Transfer all your data (income, invoices, clients, settings…) from one device to another — for example from your computer to your phone.",ar:"انقل جميع بياناتك (الإيرادات، الفواتير، العملاء، الإعدادات…) من جهاز إلى آخر — مثلاً من حاسوبك إلى هاتفك."},
   sync_export_title:{fr:"Exporter mes données",en:"Export my data",ar:"تصدير بياناتي"},
   sync_export_sub:{fr:"Crée une sauvegarde de toute ton activité, à transférer vers un autre appareil.",en:"Create a backup of all your data to transfer to another device.",ar:"أنشئ نسخة احتياطية من جميع بياناتك لنقلها إلى جهاز آخر."},
@@ -14303,6 +14414,7 @@ function openInvoice(id){
     <button class="btn" id="invClose">${t('inv_close')}</button>
     <button class="btn" id="invPrint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z"/></svg>${t('inv_print')}${isPremium()?'':' 🔒'}</button>
     <button class="btn btn-primary" id="invPdf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>${t('inv_pdf')}${isPremium()?'':' 🔒'}</button>
+    <button class="btn" id="invReceipt">🧾 ${t('rc_btn')}</button>
   </div>
   <div class="inv-doc" id="invDoc">
     <div class="inv-head">
@@ -14367,6 +14479,7 @@ function openInvoice(id){
   document.getElementById('invClose').addEventListener('click', closeInvoice);
   document.getElementById('invPrint').addEventListener('click', ()=>{ if(!pbRequire()) return; window.print(); });
   document.getElementById('invPdf').addEventListener('click', ()=>{ if(!pbRequire()) return; invoiceToPDF(f); });
+  { const _rc=document.getElementById('invReceipt'); if(_rc) _rc.addEventListener('click', ()=>genReceipt({client:f.client,montant:num(f.qte)*num(f.pu),num:f.num,date:f.date})); }
   ov.addEventListener('click', e=>{ if(e.target===ov) closeInvoice(); });
 }
 
@@ -14448,6 +14561,7 @@ function openOrder(id){
     <button class="btn" id="invClose">${t('inv_close')}</button>
     <button class="btn" id="invPrint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z"/></svg>${t('inv_print')}${isPremium()?'':' 🔒'}</button>
     <button class="btn btn-primary" id="invPdf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>${t('inv_pdf')}${isPremium()?'':' 🔒'}</button>
+    <button class="btn" id="invReceipt">🧾 ${t('rc_btn')}</button>
   </div>
   <div class="inv-doc" id="invDoc">
     <div class="inv-head">
@@ -14502,6 +14616,7 @@ function openOrder(id){
   document.getElementById('invClose').addEventListener('click', closeInvoice);
   document.getElementById('invPrint').addEventListener('click', ()=>{ if(!pbRequire()) return; window.print(); });
   document.getElementById('invPdf').addEventListener('click', ()=>{ if(!pbRequire()) return; invoiceToPDF({num:c.num||'commande'}); });
+  { const _rc=document.getElementById('invReceipt'); if(_rc) _rc.addEventListener('click', ()=>genReceipt({client:c.client,montant:num(c.qte)*num(c.pu),num:c.num,date:c.date})); }
   ov.addEventListener('click', e=>{ if(e.target===ov) closeInvoice(); });
 }
 
@@ -15052,8 +15167,9 @@ function renderFactures(){
   <div class="card">
     <div class="card-title">🧾 ${t('ct_my_invoices')}</div>
     <div class="card-sub">${t('cs_my_invoices')}</div>
-    <div class="tbl-wrap"><table id="facTbl" class="tbl-wide"><thead><tr><th style="width:96px">N°</th><th style="width:124px">${t('c_date')}</th><th style="min-width:150px">${t('c_client')}</th><th style="min-width:170px">${t('c_desc')}</th><th style="width:84px">${t('c_qty')}</th><th style="width:110px">${t('c_unit_price')}</th><th style="width:115px">${t('c_total')}</th><th style="width:190px">${t('c_status')}</th><th style="width:40px"></th></tr></thead><tbody></tbody></table></div>
+    <input class="tbl-search" data-search="#facTbl" oninput="tblFilter(this)" placeholder="${esc(t('search_ph'))}"><div class="tbl-wrap"><table id="facTbl" class="tbl-wide"><thead><tr><th style="width:96px">N°</th><th style="width:124px">${t('c_date')}</th><th style="min-width:150px">${t('c_client')}</th><th style="min-width:170px">${t('c_desc')}</th><th style="width:84px">${t('c_qty')}</th><th style="width:110px">${t('c_unit_price')}</th><th style="width:115px">${t('c_total')}</th><th style="width:190px">${t('c_status')}</th><th style="width:40px"></th></tr></thead><tbody></tbody></table></div>
     <button class="add-row" data-addfac>${t('add_invoice')}</button>
+    ${state.factures.length===0?emptyStateHTML():''}
   </div>
   <div class="card section-gap" style="max-width:420px"><div class="card-title">${t('by_status')}</div><div class="chart-box sm"><canvas id="facPie"></canvas></div></div>`;
 }
@@ -15094,8 +15210,9 @@ function renderCommandes(){
   <div class="card">
     <div class="card-title">📦 ${t('ct_my_orders')}</div>
     <div class="card-sub">${t('cs_my_orders')}</div>
-    <div class="tbl-wrap"><table id="cmdTbl" class="tbl-wide"><thead><tr><th style="width:96px">N°</th><th style="width:124px">${t('c_date')}</th><th style="min-width:150px">${t('c_client')}</th><th style="min-width:170px">${t('c_product')}</th><th style="width:84px">${t('c_qty')}</th><th style="width:110px">${t('c_unit_price')}</th><th style="width:115px">${t('c_total')}</th><th style="width:190px">${t('c_status')}</th><th style="width:40px"></th></tr></thead><tbody></tbody></table></div>
+    <input class="tbl-search" data-search="#cmdTbl" oninput="tblFilter(this)" placeholder="${esc(t('search_ph'))}"><div class="tbl-wrap"><table id="cmdTbl" class="tbl-wide"><thead><tr><th style="width:96px">N°</th><th style="width:124px">${t('c_date')}</th><th style="min-width:150px">${t('c_client')}</th><th style="min-width:170px">${t('c_product')}</th><th style="width:84px">${t('c_qty')}</th><th style="width:110px">${t('c_unit_price')}</th><th style="width:115px">${t('c_total')}</th><th style="width:190px">${t('c_status')}</th><th style="width:40px"></th></tr></thead><tbody></tbody></table></div>
     <button class="add-row" data-addcmd>${t('add_order')}</button>
+    ${state.commandes.length===0?emptyStateHTML():''}
   </div>
   <div class="card section-gap" style="max-width:420px"><div class="card-title">${t('by_status')}</div><div class="chart-box sm"><canvas id="cmdPie"></canvas></div></div>`;
 }
@@ -15140,8 +15257,9 @@ function renderClients(){
     <div class="card">
       <div class="card-title">👥 ${t('ct_contacts')}</div>
       <div class="card-sub">${t('cs_contacts')}</div>
-      <div class="tbl-wrap"><table id="cliTbl"><thead><tr><th>${t('c_name_company')}</th><th style="width:140px">${t('c_phone')}</th><th>${t('c_email')}</th><th style="width:110px">${t('c_city')}</th><th style="width:140px">${t('c_source')}</th><th style="width:130px">${t('c_status')}</th><th style="width:34px"></th></tr></thead><tbody></tbody></table></div>
+      <input class="tbl-search" data-search="#cliTbl" oninput="tblFilter(this)" placeholder="${esc(t('search_ph'))}"><div class="tbl-wrap"><table id="cliTbl"><thead><tr><th>${t('c_name_company')}</th><th style="width:140px">${t('c_phone')}</th><th>${t('c_email')}</th><th style="width:110px">${t('c_city')}</th><th style="width:140px">${t('c_source')}</th><th style="width:130px">${t('c_status')}</th><th style="width:34px"></th></tr></thead><tbody></tbody></table></div>
       <button class="add-row" data-addcli>${t('add_contact')}</button>
+      ${state.clients.length===0?emptyStateHTML():''}
     </div>
     <div class="card"><div class="card-title">${t('by_source')}</div><div class="chart-box sm"><canvas id="cliBar"></canvas></div></div>
   </div>`;
@@ -15826,6 +15944,7 @@ function bindRecords(sel,arrKey,onChange,numFields=[],isRec=false){
       const ev=inp.tagName==='SELECT'?'change':'input';
       inp.addEventListener(ev,()=>{
         obj[inp.dataset.f]= numFields.includes(inp.dataset.f)?num(inp.value):inp.value;
+        if(arrKey==='factures' && inp.dataset.f==='statut' && inp.value==='Payée' && typeof celebrate==='function'){ celebrate(); }
         // live recompute totals
         const totCell=tr.querySelector('[data-tot]'); if(totCell) totCell.textContent=FCFA(num(obj.qte)*num(obj.pu));
         const ttcCell=tr.querySelector('[data-ttc]'); if(ttcCell) ttcCell.textContent=FCFA(num(obj.ht)*(1+num(state.settings.tva)/100));
@@ -16305,7 +16424,10 @@ let   PB_CHECKOUT_URL = 'https://vwspsose.mychariow.shop/prd_qp1e5dv4';
 let   PB_PRICE_LABEL  = '3 000 FCFA / mois';
 
 function pbPremium(){ return (state.settings && state.settings.premium) || null; }
-function isPremium(){ const p=pbPremium(); return !!(p && p.active); }
+function isTrialActive(){ const tr=state.settings&&state.settings.trial; return !!(tr && tr.expires && Date.now()<tr.expires); }
+function pbTrialDaysLeft(){ const tr=state.settings&&state.settings.trial; if(!tr||!tr.expires) return 0; return Math.max(0,Math.ceil((tr.expires-Date.now())/864e5)); }
+function isPremium(){ const p=pbPremium(); return !!(p && p.active) || isTrialActive(); }
+function pbStartTrial(){ if(state.settings.trial) return; state.settings.trial={start:Date.now(),expires:Date.now()+3*864e5}; save(); pbUpdateBadge(); pbCloseModal(); toast(t('pb_trial_started')); if(typeof currentPage!=='undefined') go(currentPage); }
 function pbSavePremium(o){ state.settings.premium = o; save(); }
 function pbDeactivate(){ pbSavePremium(null); }
 
@@ -16359,7 +16481,7 @@ function pbLockedHTML(descKey){
 function pbFmtDate(s){ try{ const d=new Date(s); if(!isNaN(d.getTime())) return d.toLocaleDateString(curLang()==='ar'?'ar':(curLang()==='en'?'en-GB':'fr-FR')); }catch(e){} return String(s); }
 function pbModalHTML(){
   const p=pbPremium();
-  if(isPremium()){
+  if(p && p.active){
     const exp = (p&&p.expires)?(' · '+esc(t('pb_expires_on'))+' '+esc(pbFmtDate(p.expires))):'';
     return `<div class="pb-card">
       <button class="pb-x" onclick="pbCloseModal()" aria-label="${esc(t('pb_close'))}">×</button>
@@ -16390,11 +16512,13 @@ function pbModalHTML(){
     <div class="pb-badge-lg">✨</div>
     <h2>${t('pb_modal_title')}</h2>
     <p class="pb-msub">${t('pb_modal_sub')}</p>
+    ${isTrialActive()?`<div class="pb-trial-banner">⏳ ${tf('pb_trial_left',{n:pbTrialDaysLeft()})}</div>`:''}
     <div class="pb-feats">
       <div class="pb-feat"><span>⚡</span> ${t('pb_feat_ai')}</div>
       <div class="pb-feat"><span>📄</span> ${t('pb_feat_export')}</div>
       <div class="pb-feat"><span>📈</span> ${t('pb_feat_bizplan')}</div>
     </div>
+    ${(!state.settings.trial)?`<button class="btn btn-primary pb-trial-btn" onclick="pbStartTrial()">🎁 ${t('pb_trial_btn')}</button>`:''}
     ${payBlock}
     <div class="pb-key-row">
       <input id="pbKeyInput" placeholder="${esc(t('pb_key_ph'))}" autocomplete="off">
@@ -16406,6 +16530,72 @@ function pbModalHTML(){
 function pbOpenModal(){ const m=document.getElementById('pbModal'); if(!m) return; m.innerHTML=pbModalHTML(); m.classList.add('show'); const k=document.getElementById('pbKeyInput'); if(k) setTimeout(()=>k.focus(),60); }
 function pbCloseModal(){ const m=document.getElementById('pbModal'); if(m){ m.classList.remove('show'); m.innerHTML=''; } }
 function pbStartCheckout(){ if(PB_CHECKOUT_URL){ window.open(PB_CHECKOUT_URL,'_blank','noopener'); } else { toast(t('pb_soon')); } }
+
+/* ===== Parrainage (invitation virale via WhatsApp) ===== */
+function pbRefCode(){ if(!state.settings.refCode){ state.settings.refCode='PB-'+Math.random().toString(36).slice(2,7).toUpperCase(); save(); } return state.settings.refCode; }
+function pbInvite(){
+  const code=pbRefCode();
+  const site=(location && String(location.origin).indexOf('http')===0)?location.origin:'https://pilotebusinessb.netlify.app';
+  const txt=tf('ref_msg',{site:site,code:code});
+  window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank','noopener');
+}
+
+/* ===== Reçu de paiement partageable (gratuit, image PNG) ===== */
+async function genReceipt(o){
+  try{ await pbLoadScript(PB_CDN.h2c); }catch(e){ toast(t('rc_fail')); return; }
+  const brand=esc(state.settings.brand||state.settings.company||'Pilote Business');
+  const node=document.createElement('div');
+  node.style.cssText='position:fixed;left:-9999px;top:0;width:480px;background:#fff;color:#2E2730;font-family:Outfit,Arial,sans-serif;padding:34px 30px';
+  node.innerHTML=`
+    <div style="text-align:center;border-bottom:2px solid #F0D9E4;padding-bottom:16px;margin-bottom:18px">
+      <div style="font-family:Fraunces,serif;font-size:24px;font-weight:700;color:#C15AA0">${brand}</div>
+      <div style="font-size:12px;color:#8A7A84;letter-spacing:2px;margin-top:4px">${esc(t('rc_title'))}</div>
+    </div>
+    <div style="font-size:15px;line-height:2">
+      <div><b>${esc(t('rc_client'))} :</b> ${esc(o.client||'—')}</div>
+      <div><b>${esc(t('rc_ref'))} :</b> ${esc(o.num||'—')}</div>
+      <div><b>${esc(t('rc_date'))} :</b> ${esc(frDate(o.date||todayISO()))}</div>
+    </div>
+    <div style="text-align:center;margin:22px 0;padding:18px;background:linear-gradient(135deg,#FFF1F7,#FFE9D6);border-radius:16px">
+      <div style="font-size:12px;color:#8A7A84;text-transform:uppercase;letter-spacing:1px">${esc(t('rc_amount'))}</div>
+      <div style="font-size:30px;font-weight:800;color:#16A37B;margin-top:4px">${esc(FCFA(num(o.montant)))}</div>
+    </div>
+    <div style="text-align:center;font-size:14px;margin-bottom:6px">✅ ${esc(t('rc_thanks'))}</div>
+    <div style="text-align:center;font-size:11px;color:#B7AEB4;margin-top:14px">${esc(t('rc_footer'))} ${brand}</div>`;
+  document.body.appendChild(node);
+  try{
+    const canvas=await window.html2canvas(node,{scale:2,backgroundColor:'#ffffff'});
+    node.remove();
+    canvas.toBlob(async (blob)=>{
+      if(!blob){ toast(t('rc_fail')); return; }
+      const file=new File([blob],'recu.png',{type:'image/png'});
+      if(navigator.canShare && navigator.canShare({files:[file]})){
+        try{ await navigator.share({files:[file],title:t('rc_title')}); return; }catch(e){}
+      }
+      const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='recu-'+String(o.num||'paiement').replace(/[^\w-]/g,'_')+'.png'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1000);
+      toast(t('rc_saved'));
+    },'image/png');
+  }catch(e){ node.remove(); toast(t('rc_fail')); }
+}
+
+/* ===== Recherche instantanée dans un tableau (filtre DOM, sans accents) ===== */
+function tblFilter(inp){
+  const tb=document.querySelector(inp.dataset.search+' tbody'); if(!tb) return;
+  const q=cxNorm(inp.value);
+  tb.querySelectorAll('tr').forEach(tr=>{
+    let txt=tr.textContent||'';
+    tr.querySelectorAll('input,select,textarea').forEach(el=>{ txt+=' '+(el.value||''); if(el.tagName==='SELECT'&&el.selectedOptions&&el.selectedOptions[0]) txt+=' '+(el.selectedOptions[0].textContent||''); });
+    tr.style.display=(!q||cxNorm(txt).includes(q))?'':'none';
+  });
+}
+
+/* ===== Petite célébration (confettis) lors d'un encaissement ===== */
+function celebrate(){
+  const wrap=document.createElement('div'); wrap.className='pb-confetti';
+  const cols=['#FF5FA2','#7C5CFF','#16A37B','#F5B301','#C15AA0'];
+  for(let i=0;i<28;i++){ const d=document.createElement('i'); d.style.left=(Math.random()*100)+'%'; d.style.background=cols[i%cols.length]; d.style.animationDelay=(Math.random()*0.35)+'s'; wrap.appendChild(d); }
+  document.body.appendChild(wrap); setTimeout(()=>wrap.remove(),2300);
+}
 async function pbDoActivate(){
   const inp=document.getElementById('pbKeyInput'), fb=document.getElementById('pbFeedback'), btn=document.getElementById('pbActivateBtn');
   if(!inp) return; const key=inp.value.trim(); if(!key){ inp.focus(); return; }
