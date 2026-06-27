@@ -21,10 +21,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- xlsx, jsPDF et html2canvas ne sont PAS chargés ici : ils sont chargés à la demande
+     (uniquement lors d'un export/PDF) via pbLoadScript() — gros gain au 1er chargement. -->
 <style>
 /* ============================================================
    PILOTE BUSINESS — Design system "Vibrant" (clair + sombre)
@@ -991,6 +990,23 @@ const DEFAULT_STATE = {
 let state = load();
 function load(){ try{ const s=JSON.parse(localStorage.getItem(KEY)); return s?{...structuredClone(DEFAULT_STATE),...s}:structuredClone(DEFAULT_STATE);}catch(e){return structuredClone(DEFAULT_STATE);} }
 function save(){ localStorage.setItem(KEY, JSON.stringify(state)); if(typeof cloudPushDebounced==='function') cloudPushDebounced(); }
+
+/* Chargement À LA DEMANDE des grosses librairies d'export (perf : pas au démarrage) */
+const PB_CDN={
+  xlsx:'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
+  jspdf:'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
+  h2c:'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'
+};
+const _pbScripts={};
+function pbLoadScript(src){
+  if(_pbScripts[src]) return _pbScripts[src];
+  _pbScripts[src]=new Promise((res,rej)=>{
+    const s=document.createElement('script'); s.src=src; s.async=true;
+    s.onload=()=>res(); s.onerror=()=>{ delete _pbScripts[src]; rej(new Error('load '+src)); };
+    document.head.appendChild(s);
+  });
+  return _pbScripts[src];
+}
 let charts = {};
 function destroyCharts(){ Object.values(charts).forEach(c=>{try{c.destroy()}catch(e){}}); charts={}; }
 
@@ -14365,10 +14381,9 @@ function closeInvoice(){
 async function invoiceToPDF(f){
   const node = document.getElementById('invDoc');
   if(!node) return;
-  // jsPDF + html2canvas chargés via CDN (comme les autres exports). Repli sur impression.
-  if(typeof window.jspdf==='undefined' || typeof window.html2canvas==='undefined'){
-    window.print(); return;
-  }
+  // jsPDF + html2canvas chargés À LA DEMANDE. Repli sur impression si le chargement échoue.
+  try{ await pbLoadScript(PB_CDN.jspdf); await pbLoadScript(PB_CDN.h2c); }
+  catch(e){ window.print(); return; }
   try{
     const canvas = await window.html2canvas(node, {scale:2, backgroundColor:'#ffffff', useCORS:true});
     const img = canvas.toDataURL('image/png');
@@ -15588,9 +15603,10 @@ function cxAutoMatch(field,col){
   const map={nom:['nom','name','client','customer','contact'],tel:['tel','phone','mobile','whatsapp','numero'],email:['email','mail','courriel'],ville:['ville','city','pays','country','adresse','address'],date:['date','jour'],source:['source','produit','product','desc','libelle','label','article','item'],ht:['montant','amount','total','prix','price','revenu','revenue','net'],num:['num','ref','commande','order','facture'],client:['client','customer','nom','name'],produit:['produit','product','article','item','desc'],qte:['qte','qty','quantite','quantity','nombre'],pu:['pu','prix','price','unitaire','unit','montant','amount']};
   return (map[field]||[]).some(k=>c.includes(k));
 }
-function cxOnFile(file){
+async function cxOnFile(file){
   const status=document.getElementById('cxImportStatus');
   const setS=(m,cls)=>{ if(status){ status.textContent=m; status.className='cx-status'+(cls?(' '+cls):''); } };
+  try{ await pbLoadScript(PB_CDN.xlsx); }catch(e){ setS(t('cx_import_error'),'bad'); return; }
   const reader=new FileReader();
   reader.onload=ev=>{
     try{
@@ -15825,7 +15841,8 @@ function bindRecords(sel,arrKey,onChange,numFields=[],isRec=false){
 /* ============================================================
    EXPORT EXCEL
    ============================================================ */
-function exportExcel(page){
+async function exportExcel(page){
+  try{ await pbLoadScript(PB_CDN.xlsx); }catch(e){ toast(t('toast_nothing')); return; }
   const wb=XLSX.utils.book_new();
   const tva=num(state.settings.tva);
   if(page==='finance'||page==='recettes'){
@@ -15866,7 +15883,8 @@ function exportExcel(page){
 /* ============================================================
    EXPORT PDF (business plan)
    ============================================================ */
-function exportBizplanPDF(){
+async function exportBizplanPDF(){
+  try{ await pbLoadScript(PB_CDN.jspdf); }catch(e){ toast(t('toast_nothing')); return; }
   const {jsPDF}=window.jspdf; const doc=new jsPDF();
   const b=state.bizplan; let y=20;
   doc.setFont('helvetica','bold'); doc.setFontSize(20); doc.setTextColor(214,123,160);
