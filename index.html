@@ -635,6 +635,25 @@ table.inv-table tbody td{padding:11px 13px;border-bottom:1px solid #EFE4EB;font-
 .hero-illus img{width:100%;height:100%;object-fit:cover;object-position:center top;display:block;transform-origin:center top;animation:heroKen 24s ease-in-out infinite alternate}
 @keyframes heroKen{0%{transform:scale(1)}100%{transform:scale(1.05)}}
 @media(prefers-reduced-motion:reduce){.hero-illus img{animation:none;transform:none}}
+.notif-wrap{position:relative}
+.notif-dot{position:absolute;top:-2px;right:-2px;min-width:16px;height:16px;padding:0 4px;border-radius:9px;background:var(--rouge);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;line-height:1}
+.notif-panel{position:fixed;top:62px;right:14px;width:300px;max-width:86vw;background:var(--card);backdrop-filter:blur(24px) saturate(1.4);-webkit-backdrop-filter:blur(24px) saturate(1.4);border:1px solid var(--glass-border);border-radius:16px;box-shadow:var(--shadow-lg);padding:8px;display:none;z-index:620}
+.notif-panel.show{display:block;animation:fade .18s ease}
+.notif-head{font-weight:700;font-size:13px;color:var(--ink);padding:6px 8px}
+.notif-item{display:block;width:100%;text-align:left;background:none;border:none;border-radius:10px;padding:10px;font-size:13px;color:var(--ink);cursor:pointer;font-family:'Outfit'}
+.notif-item:hover{background:var(--rose-xl)}
+.notif-item span{margin-right:6px}
+.notif-empty{padding:14px 10px;font-size:13px;color:var(--ink-soft);text-align:center}
+.notif-enable{display:block;width:100%;margin-top:6px;background:var(--rose-xl);border:1px solid var(--rose-l);color:var(--rose-d);border-radius:10px;padding:9px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:'Outfit'}
+.ob-card{position:relative;max-width:420px;width:100%;margin:auto;background:var(--card);border:1px solid var(--glass-border);border-radius:24px;box-shadow:var(--shadow-lg);padding:34px 26px 24px;text-align:center}
+.ob-emoji{font-size:46px;margin-bottom:8px}
+.ob-card h2{font-family:'Fraunces',serif;font-size:22px;font-weight:700;color:var(--ink);margin-bottom:8px}
+.ob-card p{font-size:14px;color:var(--ink-soft);line-height:1.55;margin-bottom:18px}
+.ob-dots{display:flex;gap:6px;justify-content:center;margin-bottom:18px}
+.ob-dots span{width:7px;height:7px;border-radius:50%;background:var(--rose-l)}
+.ob-dots span.on{background:var(--grad-brand);width:20px;border-radius:4px}
+.ob-nav{display:flex;gap:10px;justify-content:space-between}
+.ob-nav .btn{flex:1;justify-content:center}
 .cl-status{font-size:12.5px;font-weight:600;color:var(--ink-soft);min-height:16px;margin-top:8px}
 .cl-status.ok{color:#16A37B}
 .cl-status.bad{color:var(--rouge)}
@@ -804,6 +823,8 @@ html[dir=rtl] .ai-msg.bot{flex-direction:row-reverse}
 
   <!-- ===== MODALE PREMIUM / ABONNEMENT ===== -->
   <div class="pb-modal" id="pbModal"></div>
+  <div class="pb-modal ob-modal" id="obModal"></div>
+  <div class="notif-panel" id="notifPanel"></div>
 
   <!-- ===== BANNIÈRE INSTALLATION iOS ===== -->
   <div class="ios-install" id="iosInstall">
@@ -828,6 +849,7 @@ html[dir=rtl] .ai-msg.bot{flex-direction:row-reverse}
         <div class="sub" id="pageSub">Bienvenue dans ton espace de pilotage</div>
       </div>
       <div class="topbar-actions" id="topActions"></div>
+      <div class="notif-wrap"><button class="icon-btn" id="notifBtn" title="Rappels" aria-label="Rappels">🔔<span class="notif-dot" id="notifDot" style="display:none"></span></button></div>
       <button class="icon-btn theme-toggle" id="themeToggle" title="Thème clair / sombre" aria-label="Basculer le thème clair / sombre"></button>
       <select class="lang-pick" id="langPick" title="Langue / Language" aria-label="Langue"></select>
     </div>
@@ -1092,6 +1114,7 @@ function go(page){
   const sa=$('#scrollArea'); if(sa) sa.scrollTop=0;
   if(window._updateScrollNav) setTimeout(window._updateScrollNav, 50);
   closeSidebar();
+  if(typeof notifRender==='function') notifRender();
 }
 function renderActions(type){
   const a = $('#topActions');
@@ -1187,6 +1210,7 @@ function renderAccueil(){
       <div class="ref-body"><div class="ref-h">${t('ref_title')}</div><div class="ref-s">${t('ref_sub')}</div></div>
       <button class="btn btn-wa ref-btn" onclick="pbInvite()">📲 ${t('ref_invite')}</button>
     </div>
+    <div style="text-align:center;margin-bottom:18px"><button class="btn btn-ghost" onclick="onboardOpen(0)">🧭 ${t('ob_replay')}</button></div>
     <div class="card" style="margin-bottom:18px">
       <div class="card-title">⚙️ ${t('set_company')}</div>
       <div class="card-sub">${t('h_company_sub')}</div>
@@ -1681,6 +1705,35 @@ const I18N = {
   rc_fail:{fr:"Impossible de générer le reçu.",en:"Couldn't generate the receipt.",ar:"تعذّر إنشاء الإيصال."},
   search_ph:{fr:"🔍 Rechercher…",en:"🔍 Search…",ar:"🔍 بحث…"},
   empty_hint:{fr:"C'est encore vide ici — ajoute ta première ligne pour démarrer 🚀",en:"It's empty here — add your first entry to get started 🚀",ar:"المكان فارغ هنا — أضف أول إدخال للبدء 🚀"},
+  nt_title:{fr:"Rappels",en:"Reminders",ar:"التذكيرات"},
+  nt_empty:{fr:"Tout est à jour 🎉",en:"All caught up 🎉",ar:"كل شيء محدّث 🎉"},
+  nt_invoices:{fr:"{n} facture(s) à encaisser ({m})",en:"{n} invoice(s) to collect ({m})",ar:"{n} فاتورة للتحصيل ({m})"},
+  nt_orders:{fr:"{n} commande(s) à traiter",en:"{n} order(s) to handle",ar:"{n} طلب قيد المعالجة"},
+  nt_relances:{fr:"{n} prospect(s) à relancer",en:"{n} prospect(s) to follow up",ar:"{n} عميل محتمل للمتابعة"},
+  nt_trial:{fr:"Ton essai Premium se termine bientôt",en:"Your Premium trial ends soon",ar:"تجربتك بريميوم تنتهي قريبًا"},
+  nt_backup:{fr:"Pense à sauvegarder tes données en ligne",en:"Remember to back up your data online",ar:"تذكّر حفظ بياناتك على الإنترنت"},
+  nt_enable:{fr:"Activer les rappels sur cet appareil",en:"Enable reminders on this device",ar:"تفعيل التذكيرات على هذا الجهاز"},
+  ob_prev:{fr:"Précédent",en:"Back",ar:"السابق"},
+  ob_next:{fr:"Suivant",en:"Next",ar:"التالي"},
+  ob_skip:{fr:"Passer",en:"Skip",ar:"تخطّي"},
+  ob_start:{fr:"C'est parti !",en:"Let's go!",ar:"لنبدأ!"},
+  ob_replay:{fr:"Revoir le guide",en:"Replay the guide",ar:"إعادة الدليل"},
+  ob1_t:{fr:"Bienvenue sur Pilote Business 👋",en:"Welcome to Pilote Business 👋",ar:"مرحبًا بك في Pilote Business 👋"},
+  ob1_d:{fr:"Ton assistant tout-en-un pour gérer et faire grandir ton activité. Voici un tour rapide des fonctionnalités.",en:"Your all-in-one assistant to run and grow your business. Here's a quick tour of the features.",ar:"مساعدك الشامل لإدارة عملك وتنميته. إليك جولة سريعة على الميزات."},
+  ob2_t:{fr:"📊 Tableau de bord & finances",en:"📊 Dashboard & finances",ar:"📊 لوحة القيادة والمالية"},
+  ob2_d:{fr:"Saisis tes recettes et dépenses : l'app calcule ton chiffre d'affaires, ton bénéfice et ta progression vers ton objectif.",en:"Enter your income and expenses: the app computes your revenue, profit and progress toward your goal.",ar:"أدخل إيراداتك ومصروفاتك: يحسب التطبيق إيراداتك وأرباحك وتقدّمك نحو هدفك."},
+  ob3_t:{fr:"🧾 Factures & commandes",en:"🧾 Invoices & orders",ar:"🧾 الفواتير والطلبات"},
+  ob3_d:{fr:"Crée tes factures, suis tes commandes. Génère un PDF, un reçu partageable, ou relance un client impayé sur WhatsApp en 1 clic.",en:"Create invoices, track orders. Generate a PDF, a shareable receipt, or remind an unpaid client on WhatsApp in one click.",ar:"أنشئ الفواتير وتابع الطلبات. أنشئ PDF أو إيصالًا أو ذكّر عميلًا متأخرًا عبر واتساب بنقرة."},
+  ob4_t:{fr:"👥 Clients & prospection",en:"👥 Clients & prospecting",ar:"👥 العملاء والتنقيب"},
+  ob4_d:{fr:"Garde ton carnet de contacts, transforme tes prospects en clients et envoie des messages en 1 clic.",en:"Keep your contacts, turn prospects into clients and message them in one click.",ar:"احتفظ بجهات اتصالك، وحوّل العملاء المحتملين إلى عملاء، وراسلهم بنقرة."},
+  ob5_t:{fr:"🏷️ Calculateur de prix",en:"🏷️ Price calculator",ar:"🏷️ حاسبة الأسعار"},
+  ob5_d:{fr:"Trouve le juste prix de vente en tenant compte de tes coûts et de ta marge.",en:"Find the right selling price based on your costs and margin.",ar:"احسب سعر البيع المناسب وفق تكاليفك وهامشك."},
+  ob6_t:{fr:"🤖 Business Plan & agent IA",en:"🤖 Business Plan & AI agent",ar:"🤖 خطة العمل ووكيل الذكاء الاصطناعي"},
+  ob6_d:{fr:"Structure ton projet et discute avec l'agent IA qui cherche le web et propose des idées marketing sur-mesure.",en:"Structure your project and chat with the AI agent that searches the web and suggests tailored marketing ideas.",ar:"نظّم مشروعك وتحدّث مع وكيل ذكاء اصطناعي يبحث في الويب ويقترح أفكارًا تسويقية مخصّصة."},
+  ob7_t:{fr:"🔗 Connexions & cloud",en:"🔗 Connections & cloud",ar:"🔗 الاتصالات والسحابة"},
+  ob7_d:{fr:"Connecte ta boutique Chariow ou importe un fichier, et crée un compte cloud pour retrouver tes données partout.",en:"Connect your Chariow store or import a file, and create a cloud account to access your data anywhere.",ar:"اربط متجر Chariow أو استورد ملفًا، وأنشئ حسابًا سحابيًا للوصول إلى بياناتك من أي مكان."},
+  ob8_t:{fr:"✨ Premium — 3 jours offerts",en:"✨ Premium — 3 days free",ar:"✨ بريميوم — ٣ أيام مجانًا"},
+  ob8_d:{fr:"Débloque l'IA en ligne, les exports PDF/Excel et le Business Plan complet. Lance ton essai gratuit dès maintenant !",en:"Unlock online AI, PDF/Excel exports and the full Business Plan. Start your free trial now!",ar:"افتح الذكاء الاصطناعي والتصدير وخطة العمل الكاملة. ابدأ تجربتك المجانية الآن!"},
   sync_intro:{fr:"Transfère toutes tes données (recettes, factures, clients, réglages…) d'un appareil à un autre — par exemple de ton ordinateur vers ton téléphone.",en:"Transfer all your data (income, invoices, clients, settings…) from one device to another — for example from your computer to your phone.",ar:"انقل جميع بياناتك (الإيرادات، الفواتير، العملاء، الإعدادات…) من جهاز إلى آخر — مثلاً من حاسوبك إلى هاتفك."},
   sync_export_title:{fr:"Exporter mes données",en:"Export my data",ar:"تصدير بياناتي"},
   sync_export_sub:{fr:"Crée une sauvegarde de toute ton activité, à transférer vers un autre appareil.",en:"Create a backup of all your data to transfer to another device.",ar:"أنشئ نسخة احتياطية من جميع بياناتك لنقلها إلى جهاز آخر."},
@@ -16068,7 +16121,7 @@ function applyBrand(){
 function initCover(){
   applyBrand();
   const cover=$('#cover');
-  $('#coverEnter').addEventListener('click',()=>{ cover.classList.add('hide'); });
+  $('#coverEnter').addEventListener('click',()=>{ cover.classList.add('hide'); if(state.settings && !state.settings.onboarded && typeof onboardOpen==='function') setTimeout(()=>onboardOpen(0),500); });
   // édition marque/slogan
   const _coverEdit=$('#coverEditBtn');
   if(_coverEdit) _coverEdit.addEventListener('click',()=>{
@@ -16596,6 +16649,62 @@ function celebrate(){
   for(let i=0;i<28;i++){ const d=document.createElement('i'); d.style.left=(Math.random()*100)+'%'; d.style.background=cols[i%cols.length]; d.style.animationDelay=(Math.random()*0.35)+'s'; wrap.appendChild(d); }
   document.body.appendChild(wrap); setTimeout(()=>wrap.remove(),2300);
 }
+
+/* ===== Notifications / rappels (in-app + option navigateur) ===== */
+function notifList(){
+  const out=[]; const today=todayISO();
+  const unpaid=state.factures.filter(f=>['Impayée','En attente','Partiellement payée'].includes(f.statut));
+  if(unpaid.length){ const tot=unpaid.reduce((s,f)=>s+num(f.qte)*num(f.pu),0); out.push({ic:'📄',txt:tf('nt_invoices',{n:unpaid.length,m:FCFA(tot)}),page:'factures'}); }
+  const orders=state.commandes.filter(c=>c.statut==='En préparation'||c.statut==='Expédiée');
+  if(orders.length) out.push({ic:'📦',txt:tf('nt_orders',{n:orders.length}),page:'commandes'});
+  const relances=state.prospects.filter(p=>p.relance && String(p.relance)<=today);
+  if(relances.length) out.push({ic:'🤝',txt:tf('nt_relances',{n:relances.length}),page:'prospection'});
+  if(isTrialActive() && pbTrialDaysLeft()<=1) out.push({ic:'⏳',txt:t('nt_trial'),page:'__premium'});
+  if(typeof _sbUser!=='undefined' && !_sbUser) out.push({ic:'☁️',txt:t('nt_backup'),page:'sync'});
+  return out;
+}
+function notifAct(page){ notifClose(); if(page==='__premium'){ pbOpenModal(); } else { go(page); } }
+function notifRender(){
+  const dot=document.getElementById('notifDot'); const list=notifList();
+  if(dot){ if(list.length){ dot.textContent=list.length; dot.style.display=''; } else dot.style.display='none'; }
+  const panel=document.getElementById('notifPanel'); if(panel){
+    panel.innerHTML=`<div class="notif-head">${t('nt_title')}</div>`+
+      (list.length? list.map(n=>`<button class="notif-item" onclick="notifAct('${n.page}')"><span>${n.ic}</span> ${esc(n.txt)}</button>`).join('') : `<div class="notif-empty">${t('nt_empty')}</div>`)+
+      (('Notification' in window && Notification.permission!=='granted')?`<button class="notif-enable" onclick="notifEnable()">🔔 ${t('nt_enable')}</button>`:'');
+  }
+}
+function notifToggle(){ const p=document.getElementById('notifPanel'); if(!p) return; if(p.classList.contains('show')){ p.classList.remove('show'); } else { notifRender(); p.classList.add('show'); } }
+function notifClose(){ const p=document.getElementById('notifPanel'); if(p) p.classList.remove('show'); }
+function notifEnable(){
+  if(!('Notification' in window)) return;
+  try{ Notification.requestPermission().then(perm=>{ if(perm==='granted'){ const l=notifList(); try{ new Notification('Pilote Business',{body: l.length? l.map(n=>n.txt).join(' · ') : t('nt_empty')}); }catch(e){} notifRender(); } }); }catch(e){}
+}
+
+/* ===== Guide de première visite (onboarding) ===== */
+const OB_STEPS=[
+  {ic:'👋',t:'ob1_t',d:'ob1_d'},{ic:'📊',t:'ob2_t',d:'ob2_d'},{ic:'🧾',t:'ob3_t',d:'ob3_d'},
+  {ic:'👥',t:'ob4_t',d:'ob4_d'},{ic:'🏷️',t:'ob5_t',d:'ob5_d'},{ic:'🤖',t:'ob6_t',d:'ob6_d'},
+  {ic:'🔗',t:'ob7_t',d:'ob7_d'},{ic:'✨',t:'ob8_t',d:'ob8_d'}
+];
+let _obStep=0;
+function onboardHTML(){
+  const s=OB_STEPS[_obStep]; const last=_obStep===OB_STEPS.length-1;
+  return `<div class="ob-card">
+    <button class="pb-x" onclick="onboardFinish()" aria-label="${esc(t('pb_close'))}">×</button>
+    <div class="ob-emoji">${s.ic}</div>
+    <h2>${t(s.t)}</h2>
+    <p>${t(s.d)}</p>
+    <div class="ob-dots">${OB_STEPS.map((_,i)=>`<span class="${i===_obStep?'on':''}"></span>`).join('')}</div>
+    <div class="ob-nav">
+      ${_obStep>0?`<button class="btn btn-ghost" onclick="onboardPrev()">${t('ob_prev')}</button>`:`<button class="btn btn-ghost" onclick="onboardFinish()">${t('ob_skip')}</button>`}
+      <button class="btn btn-primary" onclick="${last?'onboardFinish()':'onboardNext()'}">${last?('🚀 '+t('ob_start')):t('ob_next')}</button>
+    </div>
+  </div>`;
+}
+function onboardOpen(i){ _obStep=i||0; const m=document.getElementById('obModal'); if(!m) return; m.innerHTML=onboardHTML(); m.classList.add('show'); }
+function onboardNext(){ if(_obStep<OB_STEPS.length-1){ _obStep++; onboardOpen(_obStep); } }
+function onboardPrev(){ if(_obStep>0){ _obStep--; onboardOpen(_obStep); } }
+function onboardFinish(){ state.settings.onboarded=true; save(); const m=document.getElementById('obModal'); if(m){ m.classList.remove('show'); m.innerHTML=''; } }
 async function pbDoActivate(){
   const inp=document.getElementById('pbKeyInput'), fb=document.getElementById('pbFeedback'), btn=document.getElementById('pbActivateBtn');
   if(!inp) return; const key=inp.value.trim(); if(!key){ inp.focus(); return; }
@@ -17081,6 +17190,7 @@ initLangPicker();
 applyDarkMode();
 const _tg=document.getElementById('themeToggle'); if(_tg) _tg.addEventListener('click',toggleDarkMode);
 pbUpdateBadge(); pbReverify(); pbAutoActivateFromURL(); cloudInit();
+(function(){ const nb=document.getElementById('notifBtn'); if(nb) nb.addEventListener('click',e=>{ e.stopPropagation(); notifToggle(); }); document.addEventListener('click',e=>{ if(!(e.target.closest && (e.target.closest('.notif-wrap')||e.target.closest('#notifPanel')))) notifClose(); }); notifRender(); })();
 const navIc=document.getElementById('aiNavIcon'); if(navIc) navIc.innerHTML=aiIcon('accent');
 initScrollNav();
 initLock();
