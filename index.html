@@ -20,8 +20,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <!-- xlsx, jsPDF et html2canvas ne sont PAS chargés ici : ils sont chargés à la demande
      (uniquement lors d'un export/PDF) via pbLoadScript() — gros gain au 1er chargement. -->
 <style>
@@ -265,6 +265,30 @@ td input[type=number]::-webkit-inner-spin-button{ -webkit-appearance:none; margi
 .row-view:hover{background:var(--rose-l)}
 .add-row{margin-top:12px;background:var(--rose-xl);border:1.5px dashed var(--rose);color:var(--accent-text);font-weight:600;width:100%;padding:11px;border-radius:12px;cursor:pointer;font-family:'Outfit';font-size:13.5px;transition:all .16s}
 .add-row:hover{background:var(--rose-l)}
+/* ===== Tableaux de données → cartes empilées sur mobile (lisibilité, plus de scroll horizontal) ===== */
+@media (max-width:640px){
+  .tbl-wrap{overflow:visible;border:none;border-radius:0}
+  .tbl-wrap table,.tbl-wrap table.tbl-wide{min-width:0;width:100%;font-size:14px}
+  .tbl-wrap thead{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);border:0}
+  .tbl-wrap tbody tr{display:block;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px 13px;margin-bottom:12px;box-shadow:var(--shadow)}
+  .tbl-wrap tbody tr:hover{background:var(--card)}
+  .tbl-wrap tbody td{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--rose-xl);color:var(--ink);white-space:normal}
+  .tbl-wrap tbody tr td:last-child{border-bottom:none}
+  .tbl-wrap tbody td::before{content:attr(data-label);flex:0 0 auto;font-size:11px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;color:var(--ink-soft)}
+  .tbl-wrap tbody td[data-label=""]::before{content:none}
+  .tbl-wrap tbody td[data-label=""]{justify-content:flex-end;gap:8px}
+  .tbl-wrap tbody td input,.tbl-wrap tbody td select{width:auto;flex:1 1 auto;min-width:0;max-width:70%}
+  .tbl-wrap tbody td input[type=number]{text-align:right}
+  .tbl-wrap tbody td .btn-sm{max-width:none;flex:1 1 auto}
+}
+.art-overlay{position:fixed;inset:0;background:rgba(20,12,30,.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:16px;z-index:645}
+.art-overlay.show{display:flex}
+.art-card{background:var(--card);border:1px solid var(--glass-border);border-radius:20px;box-shadow:var(--shadow-lg);width:min(780px,96vw);max-height:90vh;overflow:auto;padding:20px 22px}
+.art-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.art-head h3{font-size:17px;margin:0}
+.art-x{background:none;border:none;font-size:26px;line-height:1;cursor:pointer;color:var(--ink-soft)}
+.art-total{display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding-top:12px;border-top:2px solid var(--rose-l);font-size:15px;font-weight:600}
+.art-total b{font-size:19px;color:var(--plum)}
 
 /* pills/status */
 .pill{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:20px;font-size:11.5px;font-weight:600;white-space:nowrap}
@@ -812,6 +836,8 @@ html[dir=rtl] .ai-msg.bot{flex-direction:row-reverse}
     <div class="nav-item" data-page="assistant"><span class="ic ai-nav-ic" id="aiNavIcon"></span> <span data-i18n="nav_assistant">Assistant IA</span></div>
     <div class="nav-item" data-page="sync"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg></span> <span data-i18n="nav_sync">Synchronisation</span></div>
     <div class="nav-item" data-page="connexions"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.07 0l1.93-1.93a5 5 0 0 0-7.07-7.07L10.5 5.5"/><path d="M14 11a5 5 0 0 0-7.07 0L5 12.93a5 5 0 0 0 7.07 7.07L13.5 18.5"/></svg></span> <span data-i18n="nav_connexions">Connexions</span></div>
+    <div class="nav-item" data-page="avis"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg></span> <span data-i18n="nav_avis">Avis & contact</span></div>
+    <div class="nav-item" data-page="privacy"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span> <span data-i18n="nav_privacy">Confidentialité</span></div>
     <div class="sidebar-foot">
       💾 <span data-i18n="foot_saved">Tes données sont enregistrées automatiquement sur cet appareil.</span>
     </div>
@@ -825,6 +851,19 @@ html[dir=rtl] .ai-msg.bot{flex-direction:row-reverse}
   <div class="pb-modal" id="pbModal"></div>
   <div class="pb-modal ob-modal" id="obModal"></div>
   <div class="notif-panel" id="notifPanel"></div>
+  <div class="art-overlay" id="artModal"></div>
+
+  <!-- ===== FORMULAIRE NETLIFY (détection statique des avis — soumis en AJAX depuis la page Avis) ===== -->
+  <form name="avis" data-netlify="true" netlify-honeypot="bot-field" hidden>
+    <input type="hidden" name="form-name" value="avis">
+    <input type="text" name="type">
+    <input type="text" name="rating">
+    <textarea name="message"></textarea>
+    <input type="text" name="name">
+    <input type="email" name="email">
+    <input type="text" name="langue">
+    <input name="bot-field">
+  </form>
 
   <!-- ===== BANNIÈRE INSTALLATION iOS ===== -->
   <div class="ios-install" id="iosInstall">
@@ -1010,18 +1049,22 @@ function logoMarkup(size){
 const PALETTE = ['#E8A0BF','#7BA7C4','#6FB99A','#E8C56B','#A88BA0','#E08585','#9BC4B0','#C9A0D4'];
 // Garde-fou : si Chart.js n'est pas chargé (connexion lente/absente), on neutralise
 // proprement la création de graphiques pour que l'app continue de fonctionner.
-const HAS_CHART = (typeof Chart !== 'undefined');
+// Chart.js est chargé en `defer` (non bloquant). On vérifie sa présence AU MOMENT
+// de créer un graphique et on applique les réglages par défaut une seule fois.
+let _chartDefaultsSet=false;
 function safeChart(ctx, config){
-  if(!HAS_CHART || !ctx) return null;
+  if(typeof Chart==='undefined' || !ctx) return null;
+  if(!_chartDefaultsSet){ _chartDefaultsSet=true;
+    try{
+      Chart.defaults.font.family = "'Outfit', sans-serif";
+      Chart.defaults.font.size = 12;
+      Chart.defaults.color = '#6B6270';
+      Chart.defaults.plugins.legend.labels.usePointStyle = true;
+      Chart.defaults.plugins.legend.labels.boxWidth = 8;
+      Chart.defaults.plugins.legend.labels.padding = 14;
+    }catch(e){}
+  }
   try{ return new Chart(ctx, config); }catch(e){ console.warn('Graphique indisponible:', e); return null; }
-}
-if(HAS_CHART){
-  Chart.defaults.font.family = "'Outfit', sans-serif";
-  Chart.defaults.font.size = 12;
-  Chart.defaults.color = '#6B6270';
-  Chart.defaults.plugins.legend.labels.usePointStyle = true;
-  Chart.defaults.plugins.legend.labels.boxWidth = 8;
-  Chart.defaults.plugins.legend.labels.padding = 14;
 }
 
 /* ---------------- persistence ---------------- */
@@ -1043,9 +1086,62 @@ const DEFAULT_STATE = {
            {poste:'Marketing / Publicité',a1:400000,a2:700000,a3:1100000},
            {poste:'Outils & logiciels',a1:200000,a2:300000,a3:400000} ] }
 };
+// Garantit récursivement que `obj` possède toutes les clés de `def` (sans écraser l'existant).
+function deepDefaults(obj, def){
+  if(!obj || typeof obj!=='object') return structuredClone(def);
+  for(const k in def){
+    if(def[k] && typeof def[k]==='object' && !Array.isArray(def[k])){
+      obj[k] = deepDefaults(obj[k]||{}, def[k]);
+    }else if(!(k in obj)){
+      obj[k] = structuredClone(def[k]);
+    }
+  }
+  return obj;
+}
+// Migrations de schéma : propage les nouveaux champs + convertit les anciennes factures
+// mono-ligne vers le format multi-articles (lignes[]). Idempotent et non destructif.
+function migrate(s){
+  s = deepDefaults(s, DEFAULT_STATE);
+  (s.factures||[]).forEach(f=>{
+    if(!Array.isArray(f.lignes) || !f.lignes.length){
+      f.lignes = [{ n:1, desc:f.desc||'', qte:(f.qte!=null?(+f.qte||0):1), pu:(f.pu!=null?(+f.pu||0):0) }];
+    }
+    f.lignes.forEach((l,i)=>{ l.n=i+1; });
+  });
+  (s.commandes||[]).forEach(c=>{
+    if(!Array.isArray(c.lignes) || !c.lignes.length){
+      c.lignes = [{ n:1, desc:c.produit||'', qte:(c.qte!=null?(+c.qte||0):1), pu:(c.pu!=null?(+c.pu||0):0) }];
+    }
+    c.lignes.forEach((l,i)=>{ l.n=i+1; });
+  });
+  s.version = 2;
+  return s;
+}
 let state = load();
-function load(){ try{ const s=JSON.parse(localStorage.getItem(KEY)); return s?{...structuredClone(DEFAULT_STATE),...s}:structuredClone(DEFAULT_STATE);}catch(e){return structuredClone(DEFAULT_STATE);} }
-function save(){ localStorage.setItem(KEY, JSON.stringify(state)); if(typeof cloudPushDebounced==='function') cloudPushDebounced(); }
+function load(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    const s = raw ? JSON.parse(raw) : null;
+    return migrate(s || structuredClone(DEFAULT_STATE));
+  }catch(e){ console.warn('État illisible, réinitialisation par défaut:', e); return migrate(structuredClone(DEFAULT_STATE)); }
+}
+function save(){
+  try{
+    localStorage.setItem(KEY, JSON.stringify(state));
+  }catch(e){
+    console.error('Sauvegarde impossible:', e);
+    if(typeof toast==='function'){
+      const full = e && (e.name==='QuotaExceededError' || e.code===22 || e.code===1014);
+      toast(full ? "⚠️ Stockage plein : allège tes images/logo ou exporte une sauvegarde." : "⚠️ Sauvegarde impossible sur cet appareil.");
+    }
+    return false;
+  }
+  if(typeof cloudPushDebounced==='function') cloudPushDebounced();
+  return true;
+}
+// Filet de sécurité : on trace les erreurs sans planter l'interface.
+window.addEventListener('error', e=>{ try{ console.error('Erreur non gérée:', e.error||e.message); }catch(_){}} );
+window.addEventListener('unhandledrejection', e=>{ try{ console.error('Promesse rejetée:', e.reason); }catch(_){}} );
 
 /* Chargement À LA DEMANDE des grosses librairies d'export (perf : pas au démarrage) */
 const PB_CDN={
@@ -1083,6 +1179,8 @@ const PAGES = {
   sync:{title:'Synchronisation', sub:'Transfère ton activité entre tes appareils', render:renderSync, actions:''},
   messages:{title:'Messages', sub:'Relance et remercie tes clients', render:renderMessages, actions:''},
   connexions:{title:'Connexions', sub:'Connecte tes comptes et collecte tes données', render:renderConnexions, actions:''},
+  avis:{title:'Avis & contact', sub:'Donne ton avis ou écris-nous', render:renderAvis, actions:''},
+  privacy:{title:'Confidentialité', sub:'Comment tes données sont protégées', render:renderPrivacy, actions:''},
 };
 let currentPage = 'accueil';
 let priceState = { items:[{id:uid(),nom:'',qte:1,cout:0}], labor:[{id:uid(),tache:'',min:0,taux:0}], autres:0, marge:40, tva:18, nom:'' };
@@ -1097,7 +1195,7 @@ function go(page){
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active', n.dataset.page===page));
   const p = PAGES[page];
   // titres/sous-titres traduits selon la langue active
-  const titleKeys={accueil:['nav_home','sub_home'],finance:['nav_finance','sub_finance'],recettes:['nav_income','sub_income'],factures:['nav_invoicing','sub_invoicing'],commandes:['nav_orders','sub_orders'],clients:['nav_clients','sub_clients'],prospection:['nav_prospecting','sub_prospecting'],prix:['nav_pricing','sub_pricing'],bizplan:['nav_bizplan','sub_bizplan'],assistant:['nav_assistant','sub_assistant'],sync:['nav_sync','sub_sync'],messages:['nav_messages','sub_messages'],connexions:['nav_connexions','sub_connexions']};
+  const titleKeys={accueil:['nav_home','sub_home'],finance:['nav_finance','sub_finance'],recettes:['nav_income','sub_income'],factures:['nav_invoicing','sub_invoicing'],commandes:['nav_orders','sub_orders'],clients:['nav_clients','sub_clients'],prospection:['nav_prospecting','sub_prospecting'],prix:['nav_pricing','sub_pricing'],bizplan:['nav_bizplan','sub_bizplan'],assistant:['nav_assistant','sub_assistant'],sync:['nav_sync','sub_sync'],messages:['nav_messages','sub_messages'],connexions:['nav_connexions','sub_connexions'],avis:['nav_avis','sub_avis'],privacy:['nav_privacy','sub_privacy']};
   const tk=titleKeys[page];
   $('#pageTitle').textContent = tk ? t(tk[0]) : p.title;
   $('#pageSub').textContent = tk ? t(tk[1]) : p.sub;
@@ -1129,6 +1227,25 @@ document.querySelectorAll('.nav-item').forEach(n=> n.addEventListener('click',()
 $('#burger').addEventListener('click',()=>{$('#sidebar').classList.toggle('open');$('#overlay').classList.toggle('show')});
 $('#overlay').addEventListener('click',closeSidebar);
 function closeSidebar(){$('#sidebar').classList.remove('open');$('#overlay').classList.remove('show')}
+/* Tables responsives : injecte data-label (depuis les entêtes) pour l'affichage en cartes sur mobile.
+   DRY — un seul observateur, aucune modif des fonctions fillXxx(). */
+(function(){
+  function relabel(){
+    document.querySelectorAll('.tbl-wrap table').forEach(function(tbl){
+      var ths=[].map.call(tbl.querySelectorAll('thead th'),function(th){return th.textContent.trim();});
+      tbl.querySelectorAll('tbody tr').forEach(function(tr){
+        var i=0;
+        [].forEach.call(tr.children,function(td){ if(td.tagName==='TD'){ td.setAttribute('data-label', ths[i]||''); i++; } });
+      });
+    });
+  }
+  window.pbRelabelTables=relabel;
+  var pc=document.getElementById('pageContainer');
+  if(pc && 'MutationObserver' in window){
+    var scheduled=false;
+    new MutationObserver(function(){ if(scheduled) return; scheduled=true; requestAnimationFrame(function(){ scheduled=false; relabel(); }); }).observe(pc,{childList:true,subtree:true});
+  }
+})();
 $('#topActions').addEventListener('click',e=>{
   if(e.target.closest('#actExcel')){ if(!pbRequire()) return; exportExcel(currentPage); }
   if(e.target.closest('#actPDF')){ if(!pbRequire()) return; exportBizplanPDF(); }
@@ -1676,6 +1793,47 @@ const I18N = {
   sub_sync:{fr:"Transfère ton activité entre tes appareils",en:"Transfer your data between devices",ar:"انقل بياناتك بين أجهزتك"},
   nav_connexions:{fr:"Connexions",en:"Connections",ar:"الاتصالات"},
   sub_connexions:{fr:"Connecte tes comptes et collecte tes données",en:"Connect your accounts and collect your data",ar:"اربط حساباتك واجمع بياناتك"},
+  nav_avis:{fr:"Avis & contact",en:"Feedback & contact",ar:"ملاحظات واتصال"},
+  sub_avis:{fr:"Donne ton avis ou écris-nous",en:"Share your feedback or write to us",ar:"شاركنا رأيك أو راسلنا"},
+  av_title:{fr:"Ton avis compte",en:"Your feedback matters",ar:"رأيك يهمنا"},
+  av_sub:{fr:"Une remarque, une idée, un souci ? Dis-nous tout — on lit chaque message.",en:"A remark, an idea, an issue? Tell us — we read every message.",ar:"ملاحظة أو فكرة أو مشكلة؟ أخبرنا — نقرأ كل رسالة."},
+  av_type:{fr:"Type de message",en:"Message type",ar:"نوع الرسالة"},
+  av_type_review:{fr:"Avis général",en:"General feedback",ar:"رأي عام"},
+  av_type_idea:{fr:"Suggestion / idée",en:"Suggestion / idea",ar:"اقتراح / فكرة"},
+  av_type_bug:{fr:"Problème / bug",en:"Problem / bug",ar:"مشكلة / خطأ"},
+  av_type_other:{fr:"Autre",en:"Other",ar:"أخرى"},
+  av_rating:{fr:"Ta note (facultatif)",en:"Your rating (optional)",ar:"تقييمك (اختياري)"},
+  av_message:{fr:"Ton message",en:"Your message",ar:"رسالتك"},
+  av_message_ph:{fr:"Écris ici ta remarque, ton idée ou ton problème…",en:"Write your remark, idea or issue here…",ar:"اكتب ملاحظتك أو فكرتك أو مشكلتك هنا…"},
+  av_name:{fr:"Ton nom (facultatif)",en:"Your name (optional)",ar:"اسمك (اختياري)"},
+  av_name_ph:{fr:"Ex : Daniel",en:"E.g. Daniel",ar:"مثال: دانيال"},
+  av_email:{fr:"Ton email (pour qu'on te réponde)",en:"Your email (so we can reply)",ar:"بريدك (لنرد عليك)"},
+  av_email_ph:{fr:"toi@exemple.com",en:"you@example.com",ar:"you@example.com"},
+  av_send:{fr:"Envoyer",en:"Send",ar:"إرسال"},
+  av_sending:{fr:"Envoi en cours…",en:"Sending…",ar:"جارٍ الإرسال…"},
+  av_need_msg:{fr:"Écris d'abord ton message 🙂",en:"Write your message first 🙂",ar:"اكتب رسالتك أولاً 🙂"},
+  av_privacy:{fr:"🔒 Ton message nous est envoyé en privé. Aucune donnée de ton entreprise n'est partagée.",en:"🔒 Your message is sent to us privately. None of your business data is shared.",ar:"🔒 تُرسل رسالتك إلينا بشكل خاص. لا تتم مشاركة أي من بيانات عملك."},
+  av_thanks_title:{fr:"Merci pour ton retour !",en:"Thanks for your feedback!",ar:"شكرًا على ملاحظتك!"},
+  av_thanks_sub:{fr:"On a bien reçu ton message. Chaque retour nous aide à améliorer Pilote Business.",en:"We received your message. Every feedback helps us improve Pilote Business.",ar:"لقد استلمنا رسالتك. كل ملاحظة تساعدنا على تحسين Pilote Business."},
+  av_again:{fr:"Envoyer un autre message",en:"Send another message",ar:"إرسال رسالة أخرى"},
+  av_fail:{fr:"Envoi impossible pour le moment. Écris-nous directement :",en:"Couldn't send right now. Write to us directly:",ar:"تعذّر الإرسال الآن. راسلنا مباشرة:"},
+  nav_privacy:{fr:"Confidentialité",en:"Privacy",ar:"الخصوصية"},
+  sub_privacy:{fr:"Comment tes données sont protégées",en:"How your data is protected",ar:"كيف تُحمى بياناتك"},
+  pv_s1_t:{fr:"Notre engagement",en:"Our commitment",ar:"التزامنا"},
+  pv_s1:{fr:"Pilote Business t'aide à piloter ton activité. Tes données t'appartiennent : nous ne les vendons jamais et n'y accédons pas à ton insu.",en:"Pilote Business helps you run your business. Your data belongs to you: we never sell it and do not access it without your knowledge.",ar:"يساعدك Pilote Business على إدارة نشاطك. بياناتك ملكك: لا نبيعها أبدًا ولا نصل إليها دون علمك."},
+  pv_s2_t:{fr:"Données traitées",en:"Data we handle",ar:"البيانات المُعالجة"},
+  pv_s2:{fr:"Uniquement ce que tu saisis : informations de ton entreprise, recettes, dépenses, factures, commandes, clients et prospects. Et, si tu les fournis, ton adresse e-mail et ta clé Chariow.",en:"Only what you enter: your business info, income, expenses, invoices, orders, clients and prospects. And, if you provide them, your email address and Chariow key.",ar:"فقط ما تُدخله: معلومات نشاطك، الإيرادات، المصروفات، الفواتير، الطلبات، العملاء والمحتملون. وإن قدّمتها، بريدك الإلكتروني ومفتاح Chariow."},
+  pv_s3_t:{fr:"Où sont stockées tes données",en:"Where your data is stored",ar:"أين تُخزَّن بياناتك"},
+  pv_s3:{fr:"Par défaut, tout est enregistré localement sur ton appareil (local-first). Si tu crées un compte cloud, une copie est stockée de façon sécurisée pour synchroniser tes appareils.",en:"By default, everything is saved locally on your device (local-first). If you create a cloud account, a copy is stored securely to sync your devices.",ar:"افتراضيًا، يُحفظ كل شيء محليًا على جهازك. وإذا أنشأت حسابًا سحابيًا، تُخزَّن نسخة بأمان لمزامنة أجهزتك."},
+  pv_s4_t:{fr:"Utilisation & partage",en:"Use & sharing",ar:"الاستخدام والمشاركة"},
+  pv_s4:{fr:"Tes données servent uniquement à te fournir le service. Aucune vente, aucun usage publicitaire. Seuls des prestataires que tu actives toi-même (Supabase pour le cloud, Chariow pour l'import, Netlify pour le formulaire d'avis) traitent les données strictement nécessaires.",en:"Your data is used only to provide the service. No selling, no advertising use. Only providers you enable yourself (Supabase for cloud, Chariow for import, Netlify for the feedback form) process strictly necessary data.",ar:"تُستخدم بياناتك فقط لتقديم الخدمة. لا بيع ولا استخدام إعلاني. فقط مزوّدون تُفعّلهم بنفسك (Supabase للسحابة، Chariow للاستيراد، Netlify لنموذج الملاحظات) يعالجون البيانات الضرورية."},
+  pv_s5_t:{fr:"Sécurité",en:"Security",ar:"الأمان"},
+  pv_s5:{fr:"Connexions chiffrées (HTTPS), stockage local sur ton appareil et accès cloud protégé par des règles de sécurité propres à chaque utilisateur. Pense à exporter régulièrement une sauvegarde.",en:"Encrypted connections (HTTPS), local storage on your device, and cloud access protected by per-user security rules. Remember to export a backup regularly.",ar:"اتصالات مشفّرة (HTTPS)، تخزين محلي على جهازك، ووصول سحابي محمي بقواعد أمان لكل مستخدم. تذكّر تصدير نسخة احتياطية بانتظام."},
+  pv_s6_t:{fr:"Tes droits",en:"Your rights",ar:"حقوقك"},
+  pv_s6:{fr:"Tu peux à tout moment consulter, exporter (Synchronisation → Exporter) ou supprimer tes données, en les effaçant dans l'app ou en vidant le stockage de ton navigateur.",en:"At any time you can view, export (Sync → Export) or delete your data, by clearing it in the app or emptying your browser storage.",ar:"يمكنك في أي وقت عرض بياناتك أو تصديرها (المزامنة ← تصدير) أو حذفها، بمسحها في التطبيق أو تفريغ تخزين المتصفح."},
+  pv_contact_t:{fr:"Contact",en:"Contact",ar:"اتصال"},
+  pv_contact:{fr:"Une question sur tes données ? Écris-nous à {e}.",en:"A question about your data? Write to us at {e}.",ar:"سؤال عن بياناتك؟ راسلنا على {e}."},
+  pv_updated:{fr:"Dernière mise à jour : juillet 2026.",en:"Last updated: July 2026.",ar:"آخر تحديث: يوليو 2026."},
   todo_title:{fr:"À faire",en:"To do",ar:"المهام"},
   todo_invoices:{fr:"Factures à encaisser",en:"Invoices to collect",ar:"فواتير للتحصيل"},
   todo_orders:{fr:"Commandes à traiter",en:"Orders to handle",ar:"طلبات قيد المعالجة"},
@@ -1800,6 +1958,22 @@ const I18N = {
   v_Payée:{fr:"Payée",en:"Paid",ar:"مدفوعة"},
   "v_En attente":{fr:"En attente",en:"Pending",ar:"قيد الانتظار"},
   "v_Partiellement payée":{fr:"Partiellement payée",en:"Partially paid",ar:"مدفوعة جزئيًا"},
+  c_paid:{fr:"Encaissé",en:"Paid",ar:"المحصّل"},
+  c_remaining:{fr:"Reste",en:"Remaining",ar:"المتبقي"},
+  c_due:{fr:"Échéance",en:"Due date",ar:"تاريخ الاستحقاق"},
+  fac_overdue_n:{fr:"{n} en retard",en:"{n} overdue",ar:"{n} متأخرة"},
+  fin_incl_inv:{fr:"dont {m} de factures",en:"incl. {m} from invoices",ar:"منها {m} من الفواتير"},
+  acct_title:{fr:"💼 Compte de l'entreprise",en:"💼 Business account",ar:"💼 حساب الشركة"},
+  acct_treasury:{fr:"Trésorerie encaissée",en:"Cash collected",ar:"السيولة المحصّلة"},
+  acct_receivable:{fr:"À encaisser (factures)",en:"To collect (invoices)",ar:"للتحصيل (فواتير)"},
+  nt_invoices_late:{fr:"{n} facture(s) à encaisser ({m}) · {l} en retard",en:"{n} invoice(s) to collect ({m}) · {l} overdue",ar:"{n} فاتورة للتحصيل ({m}) · {l} متأخرة"},
+  c_items:{fr:"article(s)",en:"item(s)",ar:"بند"},
+  c_items_col:{fr:"Articles",en:"Items",ar:"البنود"},
+  art_title:{fr:"Articles de la facture",en:"Invoice items",ar:"بنود الفاتورة"},
+  art_desc:{fr:"Désignation",en:"Description",ar:"البيان"},
+  art_desc_ph:{fr:"Ex : Pack templates",en:"E.g. Templates pack",ar:"مثال: حزمة قوالب"},
+  art_add:{fr:"+ Ajouter un article",en:"+ Add an item",ar:"+ إضافة بند"},
+  art_done:{fr:"Terminé",en:"Done",ar:"تم"},
   v_Impayée:{fr:"Impayée",en:"Unpaid",ar:"غير مدفوعة"},
   // --- Valeurs : statuts commandes ---
   "v_En préparation":{fr:"En préparation",en:"Preparing",ar:"قيد التحضير"},
@@ -14433,8 +14607,7 @@ function openInvoice(id){
   if(!f) return;
   const s = state.settings;
   const tva = num(s.tva);
-  const qte = num(f.qte), pu = num(f.pu);
-  const ht = qte*pu;
+  const ht = facTotalOne(f);
   const taxAmount = ht*tva/100;
   const ttc = ht+taxAmount;
 
@@ -14497,9 +14670,9 @@ function openInvoice(id){
     </div>
 
     <table class="inv-table">
-      <thead><tr><th>${t('inv_desc')}</th><th class="num">${t('inv_qty')}</th><th class="num">${t('inv_unit')}</th><th class="num">${t('inv_amount')}</th></tr></thead>
+      <thead><tr><th style="width:34px">N°</th><th>${t('inv_desc')}</th><th class="num">${t('inv_qty')}</th><th class="num">${t('inv_unit')}</th><th class="num">${t('inv_amount')}</th></tr></thead>
       <tbody>
-        <tr><td>${esc(f.desc||'—')}</td><td class="num">${qte}</td><td class="num">${FCFA(pu)}</td><td class="num">${FCFA(ht)}</td></tr>
+        ${facLignes(f).map(l=>`<tr><td>${l.n}</td><td>${esc(l.desc||'—')}</td><td class="num">${num(l.qte)}</td><td class="num">${FCFA(num(l.pu))}</td><td class="num">${FCFA(num(l.qte)*num(l.pu))}</td></tr>`).join('')}
       </tbody>
     </table>
 
@@ -14532,7 +14705,7 @@ function openInvoice(id){
   document.getElementById('invClose').addEventListener('click', closeInvoice);
   document.getElementById('invPrint').addEventListener('click', ()=>{ if(!pbRequire()) return; window.print(); });
   document.getElementById('invPdf').addEventListener('click', ()=>{ if(!pbRequire()) return; invoiceToPDF(f); });
-  { const _rc=document.getElementById('invReceipt'); if(_rc) _rc.addEventListener('click', ()=>genReceipt({client:f.client,montant:num(f.qte)*num(f.pu),num:f.num,date:f.date})); }
+  { const _rc=document.getElementById('invReceipt'); if(_rc) _rc.addEventListener('click', ()=>genReceipt({client:f.client,montant:facTotalOne(f),num:f.num,date:f.date})); }
   ov.addEventListener('click', e=>{ if(e.target===ov) closeInvoice(); });
 }
 
@@ -14574,6 +14747,71 @@ function bindInvoiceViews(){
   document.querySelectorAll('#facTbl [data-view]').forEach(btn=>{
     btn.addEventListener('click', ()=>openInvoice(btn.dataset.view));
   });
+  document.querySelectorAll('#facTbl [data-arts]').forEach(btn=>{
+    btn.addEventListener('click', ()=>openArticles(btn.dataset.arts));
+  });
+}
+
+/* ===== Éditeur d'articles de facture (multi-lignes, N° d'ordre auto) ===== */
+let _artObj=null, _artArr='factures';
+function openArticles(id, arr){
+  arr=arr||'factures';
+  const list=state[arr]||[]; const f=list.find(x=>x.id===id); if(!f) return;
+  if(!Array.isArray(f.lignes) || !f.lignes.length){
+    f.lignes=facLignes(f).map((l,i)=>({n:i+1,desc:l.desc||'',qte:num(l.qte)||1,pu:num(l.pu)||0}));
+  }
+  _artObj=f; _artArr=arr; renderArticles();
+  const m=document.getElementById('artModal'); if(m){ m.classList.add('show'); document.body.style.overflow='hidden'; }
+}
+function renderArticles(){
+  const f=_artObj, m=document.getElementById('artModal'); if(!f||!m) return;
+  const rows=f.lignes.map(l=>`<tr data-ln="${l.n}">
+    <td style="text-align:center;font-weight:700;color:var(--rose-d)">${l.n}</td>
+    <td><input data-l="desc" value="${esc(l.desc||'')}" placeholder="${esc(t('art_desc_ph'))}"></td>
+    <td><input class="num" type="number" data-l="qte" value="${l.qte!=null?l.qte:1}"></td>
+    <td><input class="num" type="number" data-l="pu" value="${l.pu||''}"></td>
+    <td class="num" data-lt style="font-weight:600">${FCFA(num(l.qte)*num(l.pu))}</td>
+    <td><button class="row-del" data-lndel="${l.n}">×</button></td></tr>`).join('');
+  m.innerHTML=`<div class="art-card">
+    <div class="art-head"><h3>🧾 ${t('art_title')}${f.num?' · '+esc(f.num):''}</h3><button class="art-x" id="artClose">×</button></div>
+    <div class="tbl-wrap"><table id="artTbl"><thead><tr><th style="width:44px">N°</th><th>${t('art_desc')}</th><th style="width:82px">${t('inv_qty')}</th><th style="width:120px">${t('inv_unit')}</th><th style="width:120px">${t('inv_amount')}</th><th style="width:34px"></th></tr></thead><tbody>${rows}</tbody></table></div>
+    <button class="add-row" id="artAdd">${t('art_add')}</button>
+    <div class="art-total"><span>${t('inv_subtotal')}</span><b>${FCFA(facTotalOne(f))}</b></div>
+    <div style="text-align:right;margin-top:14px"><button class="btn btn-primary" id="artDone">${t('art_done')}</button></div>
+  </div>`;
+  bindArticles();
+}
+function bindArticles(){
+  const f=_artObj; if(!f) return;
+  document.querySelectorAll('#artTbl tbody tr').forEach(tr=>{
+    const n=+tr.dataset.ln, l=f.lignes.find(x=>x.n===n); if(!l) return;
+    tr.querySelectorAll('[data-l]').forEach(inp=>inp.addEventListener('input',()=>{
+      l[inp.dataset.l]= inp.dataset.l==='desc'?inp.value:num(inp.value);
+      const lt=tr.querySelector('[data-lt]'); if(lt) lt.textContent=FCFA(num(l.qte)*num(l.pu));
+      const tb=document.querySelector('.art-total b'); if(tb) tb.textContent=FCFA(facTotalOne(f));
+      save();
+    }));
+    const del=tr.querySelector('[data-lndel]'); if(del) del.addEventListener('click',()=>{
+      f.lignes=f.lignes.filter(x=>x.n!==n);
+      if(!f.lignes.length) f.lignes=[{n:1,desc:'',qte:1,pu:0}];
+      f.lignes.forEach((x,i)=>x.n=i+1); save(); renderArticles();
+    });
+  });
+  const add=document.getElementById('artAdd'); if(add) add.addEventListener('click',()=>{
+    const nextN=f.lignes.reduce((mx,x)=>Math.max(mx,x.n),0)+1;
+    f.lignes.push({n:nextN,desc:'',qte:1,pu:0}); save(); renderArticles();
+  });
+  const close=()=>closeArticles();
+  const cl=document.getElementById('artClose'); if(cl) cl.addEventListener('click',close);
+  const dn=document.getElementById('artDone'); if(dn) dn.addEventListener('click',close);
+  const m=document.getElementById('artModal'); if(m) m.onclick=e=>{ if(e.target===m) close(); };
+}
+function closeArticles(){
+  const m=document.getElementById('artModal'); if(m){ m.classList.remove('show'); m.innerHTML=''; }
+  document.body.style.overflow='';
+  if(_artObj){ if(_artArr==='factures') _artObj.statut=facStatutAuto(_artObj); save(); }
+  _artObj=null;
+  if(currentPage==='factures'||currentPage==='commandes') go(currentPage);
 }
 
 /* ============================================================
@@ -14585,8 +14823,7 @@ function openOrder(id){
   if(!c) return;
   const s = state.settings;
   const tva = num(s.tva);
-  const qte = num(c.qte), pu = num(c.pu);
-  const ht = qte*pu;
+  const ht = facTotalOne(c);
   const taxAmount = ht*tva/100;
   const ttc = ht+taxAmount;
 
@@ -14642,9 +14879,9 @@ function openOrder(id){
       </div>
     </div>
     <table class="inv-table">
-      <thead><tr><th>${t('ord_product')}</th><th class="num">${t('inv_qty')}</th><th class="num">${t('inv_unit')}</th><th class="num">${t('inv_amount')}</th></tr></thead>
+      <thead><tr><th style="width:34px">N°</th><th>${t('ord_product')}</th><th class="num">${t('inv_qty')}</th><th class="num">${t('inv_unit')}</th><th class="num">${t('inv_amount')}</th></tr></thead>
       <tbody>
-        <tr><td>${esc(c.produit||'—')}</td><td class="num">${qte}</td><td class="num">${FCFA(pu)}</td><td class="num">${FCFA(ht)}</td></tr>
+        ${facLignes(c).map(l=>`<tr><td>${l.n}</td><td>${esc(l.desc||'—')}</td><td class="num">${num(l.qte)}</td><td class="num">${FCFA(num(l.pu))}</td><td class="num">${FCFA(num(l.qte)*num(l.pu))}</td></tr>`).join('')}
       </tbody>
     </table>
     <div class="inv-totals">
@@ -14669,13 +14906,16 @@ function openOrder(id){
   document.getElementById('invClose').addEventListener('click', closeInvoice);
   document.getElementById('invPrint').addEventListener('click', ()=>{ if(!pbRequire()) return; window.print(); });
   document.getElementById('invPdf').addEventListener('click', ()=>{ if(!pbRequire()) return; invoiceToPDF({num:c.num||'commande'}); });
-  { const _rc=document.getElementById('invReceipt'); if(_rc) _rc.addEventListener('click', ()=>genReceipt({client:c.client,montant:num(c.qte)*num(c.pu),num:c.num,date:c.date})); }
+  { const _rc=document.getElementById('invReceipt'); if(_rc) _rc.addEventListener('click', ()=>genReceipt({client:c.client,montant:facTotalOne(c),num:c.num,date:c.date})); }
   ov.addEventListener('click', e=>{ if(e.target===ov) closeInvoice(); });
 }
 
 function bindOrderViews(){
   document.querySelectorAll('#cmdTbl [data-vieworder]').forEach(btn=>{
     btn.addEventListener('click', ()=>openOrder(btn.dataset.vieworder));
+  });
+  document.querySelectorAll('#cmdTbl [data-arts]').forEach(btn=>{
+    btn.addEventListener('click', ()=>openArticles(btn.dataset.arts,'commandes'));
   });
 }
 
@@ -15108,6 +15348,16 @@ function bindMsgButtons(){
 function sum(arr,key){ return arr.reduce((s,r)=>s+num(r[key]),0); }
 // Total des recettes en TTC : on stocke le HT, le TTC se calcule avec la TVA active.
 function totalRecettesTTC(){ const tva=num(state.settings.tva); return state.recettes.reduce((s,r)=>s+num(r.ht)*(1+tva/100),0); }
+/* ---- Factures : suivi des encaissements & solvabilité ---- */
+function facLignes(f){ if(f && Array.isArray(f.lignes) && f.lignes.length) return f.lignes; return [{n:1, desc:(f&&(f.desc||f.produit))||'', qte:(f&&f.qte!=null)?f.qte:1, pu:(f&&f.pu!=null)?f.pu:0}]; }
+function facTotalOne(f){ return facLignes(f).reduce((s,l)=>s+num(l.qte)*num(l.pu),0); }
+function facPayeOne(f){ const tot=facTotalOne(f); let p=(f.paye===undefined||f.paye===null||f.paye==='')?(f.statut==='Payée'?tot:0):num(f.paye); return Math.max(0,p); }
+function facReste(f){ return Math.max(0, facTotalOne(f)-facPayeOne(f)); }
+function facStatutAuto(f){ const tot=facTotalOne(f), p=facPayeOne(f); if(tot>0 && p>=tot) return 'Payée'; if(p>0 && p<tot) return 'Partiellement payée'; return (f.statut==='Impayée'?'Impayée':'En attente'); }
+function facEnRetard(f){ return facReste(f)>0 && f.echeance && String(f.echeance)<todayISO(); }
+function totalFacturesEncaisse(){ return state.factures.reduce((s,f)=>s+facPayeOne(f),0); }
+function totalFacturesReste(){ return state.factures.reduce((s,f)=>s+facReste(f),0); }
+function caGlobal(){ return totalRecettesTTC()+totalFacturesEncaisse(); }
 function countBy(arr,key,val){ return arr.filter(r=>r[key]===val).length; }
 function sumIf(arr,key,val,sumKey){ return arr.filter(r=>r[key]===val).reduce((s,r)=>s+num(r[sumKey]),0); }
 const MONTHS=['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Août','Sep','Oct','Nov','Déc'];
@@ -15117,15 +15367,22 @@ function monthIdx(iso){ if(!iso)return -1; return new Date(iso+'T00:00:00').getM
    TABLEAU DE BORD FINANCIER
    ============================================================ */
 function renderFinance(){
-  const ca=totalRecettesTTC(), dep=sum(state.depenses,'montant');
+  const encFac=totalFacturesEncaisse(), recv=totalFacturesReste();
+  const ca=caGlobal(), dep=sum(state.depenses,'montant');
   const benef=ca-dep, marge=ca?benef/ca*100:0;
   const obj=num(state.settings.objectif), atteinte=obj?ca/obj*100:0;
   return `
   <div class="kpis">
-    <div class="kpi r"><div class="lbl">${t('kpi_revenue')}</div><div class="val">${FCFA(ca)}</div><div class="meta">${state.recettes.length} entrée(s)</div></div>
+    <div class="kpi r"><div class="lbl">${t('kpi_revenue')}</div><div class="val">${FCFA(ca)}</div><div class="meta">${encFac>0?tf('fin_incl_inv',{m:FCFA(encFac)}):state.recettes.length+' entrée(s)'}</div></div>
     <div class="kpi y"><div class="lbl">${t('kpi_expenses')}</div><div class="val">${FCFA(dep)}</div><div class="meta">${state.depenses.length} sortie(s)</div></div>
     <div class="kpi g"><div class="lbl">${t('kpi_profit_net')}</div><div class="val">${FCFA(benef)}</div><div class="meta">${benef>=0?'Positif 🎉':'Négatif'}</div></div>
     <div class="kpi b"><div class="lbl">${t('kpi_margin')}</div><div class="val">${PCT(marge)}</div><div class="meta">Objectif : ${PCT(atteinte)} atteint</div></div>
+  </div>
+  <div class="card section-gap"><div class="card-title">${t('acct_title')}</div>
+    <div style="display:flex;gap:30px;flex-wrap:wrap">
+      <div><div class="card-sub" style="margin:0 0 2px">${t('acct_treasury')}</div><div style="font-size:23px;font-weight:800;color:var(--plum)">${FCFA(ca-dep)}</div></div>
+      <div><div class="card-sub" style="margin:0 0 2px">${t('acct_receivable')}</div><div style="font-size:23px;font-weight:800;color:var(--rose-d)">${FCFA(recv)}</div></div>
+    </div>
   </div>
   <div class="two-charts">
     <div class="card"><div class="card-title">${t('chart_inc_exp')}</div><div class="chart-box"><canvas id="finBar"></canvas></div></div>
@@ -15143,6 +15400,7 @@ function renderFinance(){
 function initFinanceCharts(){
   const rec=Array(12).fill(0), dep=Array(12).fill(0);
   state.recettes.forEach(r=>{const m=monthIdx(r.date); if(m>=0)rec[m]+=num(r.ttc);});
+  state.factures.forEach(f=>{const m=monthIdx(f.date); if(m>=0)rec[m]+=facPayeOne(f);});
   state.depenses.forEach(d=>{const m=monthIdx(d.date); if(m>=0)dep[m]+=num(d.montant);});
   if($('#finBar')) charts.finBar=safeChart($('#finBar'),{type:'bar',
     data:{labels:MONTHS,datasets:[
@@ -15208,19 +15466,20 @@ function fillRecettes(){
 const FAC_STATUTS=['Payée','En attente','Partiellement payée','Impayée'];
 const PAY_MODES=['Mobile money','Virement','Espèces','Carte bancaire','Chèque','Paypal'];
 function renderFactures(){
-  const tot=state.factures.reduce((s,f)=>s+num(f.qte)*num(f.pu),0);
-  const enc=state.factures.filter(f=>f.statut==='Payée').reduce((s,f)=>s+num(f.qte)*num(f.pu),0);
+  const tot=state.factures.reduce((s,f)=>s+facTotalOne(f),0);
+  const enc=totalFacturesEncaisse();
+  const late=state.factures.filter(facEnRetard).length;
   return `
   <div class="kpis">
     <div class="kpi b"><div class="lbl">${t('kpi_nb_invoices')}</div><div class="val">${state.factures.length}</div></div>
     <div class="kpi r"><div class="lbl">${t('kpi_total_invoiced')}</div><div class="val">${FCFA(tot)}</div></div>
     <div class="kpi g"><div class="lbl">${t('kpi_collected')}</div><div class="val">${FCFA(enc)}</div></div>
-    <div class="kpi y"><div class="lbl">${t('kpi_pending')}</div><div class="val">${FCFA(tot-enc)}</div></div>
+    <div class="kpi y"><div class="lbl">${t('kpi_pending')}</div><div class="val">${FCFA(tot-enc)}</div><div class="meta">${late?tf('fac_overdue_n',{n:late}):''}</div></div>
   </div>
   <div class="card">
     <div class="card-title">🧾 ${t('ct_my_invoices')}</div>
     <div class="card-sub">${t('cs_my_invoices')}</div>
-    <input class="tbl-search" data-search="#facTbl" oninput="tblFilter(this)" placeholder="${esc(t('search_ph'))}"><div class="tbl-wrap"><table id="facTbl" class="tbl-wide"><thead><tr><th style="width:96px">N°</th><th style="width:124px">${t('c_date')}</th><th style="min-width:150px">${t('c_client')}</th><th style="min-width:170px">${t('c_desc')}</th><th style="width:84px">${t('c_qty')}</th><th style="width:110px">${t('c_unit_price')}</th><th style="width:115px">${t('c_total')}</th><th style="width:190px">${t('c_status')}</th><th style="width:40px"></th></tr></thead><tbody></tbody></table></div>
+    <input class="tbl-search" data-search="#facTbl" oninput="tblFilter(this)" placeholder="${esc(t('search_ph'))}"><div class="tbl-wrap"><table id="facTbl" class="tbl-wide"><thead><tr><th style="width:96px">N°</th><th style="width:124px">${t('c_date')}</th><th style="min-width:150px">${t('c_client')}</th><th style="width:160px">${t('c_items_col')}</th><th style="width:115px">${t('c_total')}</th><th style="width:110px">${t('c_paid')}</th><th style="width:100px">${t('c_remaining')}</th><th style="width:140px">${t('c_due')}</th><th style="width:175px">${t('c_status')}</th><th style="width:40px"></th></tr></thead><tbody></tbody></table></div>
     <button class="add-row" data-addfac>${t('add_invoice')}</button>
     ${state.factures.length===0?emptyStateHTML():''}
   </div>
@@ -15230,10 +15489,11 @@ function facRow(f){
   return `<tr data-id="${f.id}"><td><input data-f="num" value="${esc(f.num)}" placeholder="FAC-001"></td>
   <td><input type="date" data-f="date" value="${f.date||''}"></td>
   <td><input data-f="client" value="${esc(f.client)}"></td>
-  <td><input data-f="desc" value="${esc(f.desc)}"></td>
-  <td><input class="num" type="number" data-f="qte" value="${f.qte||1}"></td>
-  <td><input class="num" type="number" data-f="pu" value="${f.pu||''}"></td>
-  <td class="num" data-tot style="font-weight:600">${FCFA(num(f.qte)*num(f.pu))}</td>
+  <td><button class="btn btn-sm" data-arts="${f.id}">🧾 ${facLignes(f).length} ${t('c_items')}</button></td>
+  <td class="num" data-tot style="font-weight:600">${FCFA(facTotalOne(f))}</td>
+  <td><input class="num" type="number" data-f="paye" value="${(f.paye!==undefined&&f.paye!==null&&f.paye!=='')?f.paye:(f.statut==='Payée'?facTotalOne(f):'')}" placeholder="0"></td>
+  <td class="num" data-reste style="font-weight:600;color:${facEnRetard(f)?'#C0392B':'inherit'}">${FCFA(facReste(f))}</td>
+  <td><input type="date" data-f="echeance" value="${f.echeance||''}"></td>
   <td><select data-f="statut" data-stat>${FAC_STATUTS.map(s=>`<option value="${s}" ${f.statut===s?'selected':''}>${tv(s)}</option>`).join('')}</select></td>
   <td style="white-space:nowrap"><button class="row-view" data-view="${f.id}" title="${esc(t('inv_view'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h4"/></svg></button><button class="row-del">×</button></td></tr>`;
 }
@@ -15252,7 +15512,7 @@ function initFacChart(){
 const CMD_STATUTS=['En préparation','Expédiée','Livrée','Annulée','Remboursée'];
 function statClass(s){ return ({'Payée':'green','Livrée':'green','Converti':'green','En attente':'yellow','En préparation':'yellow','À relancer':'yellow','Impayée':'red','Annulée':'red','Perdu':'red','Remboursée':'red','Expédiée':'blue','En contact':'blue','Partiellement payée':'blue'})[s]||'grey'; }
 function renderCommandes(){
-  const ca=state.commandes.reduce((s,c)=>s+num(c.qte)*num(c.pu),0);
+  const ca=state.commandes.reduce((s,c)=>s+facTotalOne(c),0);
   return `
   <div class="kpis">
     <div class="kpi b"><div class="lbl">${t('kpi_nb_orders')}</div><div class="val">${state.commandes.length}</div></div>
@@ -15263,7 +15523,7 @@ function renderCommandes(){
   <div class="card">
     <div class="card-title">📦 ${t('ct_my_orders')}</div>
     <div class="card-sub">${t('cs_my_orders')}</div>
-    <input class="tbl-search" data-search="#cmdTbl" oninput="tblFilter(this)" placeholder="${esc(t('search_ph'))}"><div class="tbl-wrap"><table id="cmdTbl" class="tbl-wide"><thead><tr><th style="width:96px">N°</th><th style="width:124px">${t('c_date')}</th><th style="min-width:150px">${t('c_client')}</th><th style="min-width:170px">${t('c_product')}</th><th style="width:84px">${t('c_qty')}</th><th style="width:110px">${t('c_unit_price')}</th><th style="width:115px">${t('c_total')}</th><th style="width:190px">${t('c_status')}</th><th style="width:40px"></th></tr></thead><tbody></tbody></table></div>
+    <input class="tbl-search" data-search="#cmdTbl" oninput="tblFilter(this)" placeholder="${esc(t('search_ph'))}"><div class="tbl-wrap"><table id="cmdTbl" class="tbl-wide"><thead><tr><th style="width:96px">N°</th><th style="width:124px">${t('c_date')}</th><th style="min-width:150px">${t('c_client')}</th><th style="width:160px">${t('c_items_col')}</th><th style="width:115px">${t('c_total')}</th><th style="width:190px">${t('c_status')}</th><th style="width:40px"></th></tr></thead><tbody></tbody></table></div>
     <button class="add-row" data-addcmd>${t('add_order')}</button>
     ${state.commandes.length===0?emptyStateHTML():''}
   </div>
@@ -15273,10 +15533,8 @@ function cmdRow(c){
   return `<tr data-id="${c.id}"><td><input data-f="num" value="${esc(c.num)}" placeholder="CMD-001"></td>
   <td><input type="date" data-f="date" value="${c.date||''}"></td>
   <td><input data-f="client" value="${esc(c.client)}"></td>
-  <td><input data-f="produit" value="${esc(c.produit)}"></td>
-  <td><input class="num" type="number" data-f="qte" value="${c.qte||1}"></td>
-  <td><input class="num" type="number" data-f="pu" value="${c.pu||''}"></td>
-  <td class="num" data-tot style="font-weight:600">${FCFA(num(c.qte)*num(c.pu))}</td>
+  <td><button class="btn btn-sm" data-arts="${c.id}" data-artkind="commandes">🧾 ${facLignes(c).length} ${t('c_items')}</button></td>
+  <td class="num" data-tot style="font-weight:600">${FCFA(facTotalOne(c))}</td>
   <td><select data-f="statut" data-stat>${CMD_STATUTS.map(s=>`<option value="${s}" ${c.statut===s?'selected':''}>${tv(s)}</option>`).join('')}</select></td>
   <td style="white-space:nowrap"><button class="row-view" data-vieworder="${c.id}" title="${esc(t('inv_view'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h4"/></svg></button><button class="row-del">×</button></td></tr>`;
 }
@@ -15491,10 +15749,8 @@ function bindPage(page){
     const signInput=$('#signInput');
     if(signInput) signInput.addEventListener('change',e=>{
       const file=e.target.files[0]; if(!file) return;
-      if(file.size>1024*1024){ toast('⚠️ Image trop lourde (max 1 Mo)'); return; }
-      const reader=new FileReader();
-      reader.onload=ev=>{ state.settings.invSignature=ev.target.result; save(); toast(t('toast_sign_ok')); go('accueil'); };
-      reader.readAsDataURL(file);
+      if(file.size>4*1024*1024){ toast('⚠️ Image trop lourde (max 4 Mo)'); return; }
+      pbCompressImage(file, 480, dataURL=>{ if(!dataURL) return; state.settings.invSignature=dataURL; save(); toast(t('toast_sign_ok')); go('accueil'); });
     });
     const signRemove=$('#signRemove');
     if(signRemove) signRemove.addEventListener('click',()=>{ state.settings.invSignature=null; save(); toast(t('toast_sign_off')); go('accueil'); });
@@ -15571,7 +15827,7 @@ function bindPage(page){
   if(page==='factures'){
     fillFactures(); initFacChart(); bindInvoiceViews();
     pg.querySelector('[data-addfac]').addEventListener('click',()=>{state.factures.push({id:uid(),num:'FAC-'+String(state.factures.length+1).padStart(3,'0'),date:todayISO(),client:'',desc:'',qte:1,pu:0,statut:'En attente'});fillFactures();save();go('factures');});
-    bindRecords('#facTbl','factures',()=>{initFacChart();bindInvoiceViews();},['qte','pu']);
+    bindRecords('#facTbl','factures',()=>{initFacChart();bindInvoiceViews();},['qte','pu','paye']);
   }
   if(page==='commandes'){
     fillCommandes(); initCmdChart(); bindOrderViews();
@@ -15601,6 +15857,7 @@ function bindPage(page){
   if(page==='sync'){ bindSync(); }
   if(page==='messages'){ bindMessages(); }
   if(page==='connexions'){ bindConnexions(); }
+  if(page==='avis'){ bindAvis(); }
 }
 function bindBp(){
   $('#bpTbl').querySelectorAll('tr').forEach(tr=>{
@@ -15706,6 +15963,96 @@ function renderConnexions(){
     <div id="cxMap"></div>
     <div class="cx-status" id="cxImportStatus"></div>
   </div>`;
+}
+/* ============================================================
+   AVIS & CONTACT  (Netlify Forms — soumission AJAX)
+   ============================================================ */
+function renderAvis(){
+  return `
+  <div class="card">
+    <div class="card-title">📣 ${t('av_title')}</div>
+    <div class="card-sub">${t('av_sub')}</div>
+    <div id="avForm">
+      <div class="field"><label>${t('av_type')}</label>
+        <select id="avType">
+          <option value="Avis">${t('av_type_review')}</option>
+          <option value="Suggestion">${t('av_type_idea')}</option>
+          <option value="Bug">${t('av_type_bug')}</option>
+          <option value="Autre">${t('av_type_other')}</option>
+        </select>
+      </div>
+      <div class="field"><label>${t('av_rating')}</label>
+        <div id="avStars" style="display:flex;gap:8px;font-size:32px;line-height:1">${[1,2,3,4,5].map(n=>`<span class="av-star" data-v="${n}" style="cursor:pointer;color:var(--rose-l);transition:transform .12s,color .12s">★</span>`).join('')}</div>
+      </div>
+      <div class="field"><label>${t('av_message')}</label>
+        <textarea id="avMsg" rows="5" placeholder="${esc(t('av_message_ph'))}"></textarea>
+      </div>
+      <div style="display:flex;gap:14px;flex-wrap:wrap">
+        <div class="field" style="flex:1;min-width:210px"><label>${t('av_name')}</label><input id="avName" placeholder="${esc(t('av_name_ph'))}"></div>
+        <div class="field" style="flex:1;min-width:210px"><label>${t('av_email')}</label><input id="avEmail" type="email" placeholder="${esc(t('av_email_ph'))}"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:4px">
+        <button class="btn btn-primary" id="avSend">${t('av_send')}</button>
+        <span class="cx-status" id="avStatus"></span>
+      </div>
+      <div class="cx-hint" style="margin-top:10px">${t('av_privacy')}</div>
+    </div>
+    <div id="avThanks" style="display:none;text-align:center;padding:26px 8px">
+      <div style="font-size:52px">🎉</div>
+      <div style="font-weight:800;font-size:19px;margin:10px 0 4px">${t('av_thanks_title')}</div>
+      <div class="card-sub" style="max-width:440px;margin:0 auto">${t('av_thanks_sub')}</div>
+      <button class="btn" id="avAgain" style="margin-top:16px">${t('av_again')}</button>
+    </div>
+  </div>`;
+}
+function bindAvis(){
+  const pg=$('#pg'); if(!pg) return;
+  let rating=0;
+  const stars=pg.querySelectorAll('.av-star');
+  const paint=()=>stars.forEach(s=>{ const on=(+s.dataset.v<=rating); s.style.color=on?'#F5A623':'var(--rose-l)'; s.style.transform=(+s.dataset.v===rating)?'scale(1.18)':'scale(1)'; });
+  stars.forEach(s=> s.addEventListener('click',()=>{ rating=+s.dataset.v; paint(); }));
+  const status=$('#avStatus'); const send=$('#avSend');
+  if(send) send.addEventListener('click', async ()=>{
+    const msg=($('#avMsg').value||'').trim();
+    if(!msg){ status.textContent=t('av_need_msg'); status.className='cx-status bad'; return; }
+    status.textContent=t('av_sending'); status.className='cx-status'; send.disabled=true;
+    const body=new URLSearchParams({
+      'form-name':'avis',
+      type:$('#avType').value,
+      rating: rating?(rating+'/5'):'',
+      message: msg,
+      name:($('#avName').value||'').trim(),
+      email:($('#avEmail').value||'').trim(),
+      langue:(typeof curLang==='function'?curLang():'')
+    });
+    try{
+      const r=await fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body.toString()});
+      if(!r.ok) throw 0;
+      $('#avForm').style.display='none'; $('#avThanks').style.display='block';
+      if(typeof toast==='function') toast(t('av_thanks_title'));
+    }catch(e){
+      send.disabled=false; status.className='cx-status bad';
+      const mail='mailto:azidaniel284@gmail.com?subject='+encodeURIComponent('[Pilote Business] '+$('#avType').value)+'&body='+encodeURIComponent(msg);
+      status.innerHTML=t('av_fail')+' <a href="'+mail+'" style="color:var(--accent-text);font-weight:700;text-decoration:underline">azidaniel284@gmail.com</a>';
+    }
+  });
+  const again=$('#avAgain'); if(again) again.addEventListener('click',()=>go('avis'));
+}
+/* ============================================================
+   CONFIDENTIALITÉ (politique de protection des données)
+   ============================================================ */
+function renderPrivacy(){
+  const email='azidaniel284@gmail.com';
+  const S=(icon,titleKey,bodyKey)=>`<div class="card section-gap"><div class="card-title">${icon} ${t(titleKey)}</div><div class="card-sub" style="line-height:1.65">${t(bodyKey)}</div></div>`;
+  return `
+  ${S('🔒','pv_s1_t','pv_s1')}
+  ${S('📦','pv_s2_t','pv_s2')}
+  ${S('☁️','pv_s3_t','pv_s3')}
+  ${S('🤝','pv_s4_t','pv_s4')}
+  ${S('🛡️','pv_s5_t','pv_s5')}
+  ${S('⚖️','pv_s6_t','pv_s6')}
+  <div class="card section-gap"><div class="card-title">✉️ ${t('pv_contact_t')}</div><div class="card-sub" style="line-height:1.65">${tf('pv_contact',{e:`<a href="mailto:${email}" style="color:var(--accent-text);font-weight:700">${email}</a>`})}</div></div>
+  <div class="cx-hint" style="text-align:center;margin-top:14px">${t('pv_updated')}</div>`;
 }
 function compteRow(c){
   return `<tr data-id="${c.id}">
@@ -15845,7 +16192,7 @@ function sbClient(){
 function cloudStatus(msg, cls){ if(!_sbStatusEl) _sbStatusEl=document.getElementById('clStatus'); if(_sbStatusEl){ _sbStatusEl.textContent=msg||''; _sbStatusEl.className='cl-status'+(cls?(' '+cls):''); } }
 function cloudHasLocalData(){ return ['recettes','depenses','factures','commandes','clients','prospects','comptes'].some(k=>Array.isArray(state[k])&&state[k].length); }
 function cloudDataHas(d){ return d && ['recettes','clients','commandes','factures'].some(k=>Array.isArray(d[k])&&d[k].length); }
-function cloudLoadInto(d){ state = Object.assign(structuredClone(DEFAULT_STATE), d||{}); localStorage.setItem(KEY, JSON.stringify(state)); }
+function cloudLoadInto(d){ state = migrate(Object.assign(structuredClone(DEFAULT_STATE), d||{})); localStorage.setItem(KEY, JSON.stringify(state)); }
 async function cloudInit(){
   const c=sbClient(); if(!c) return;
   try{
@@ -15997,7 +16344,19 @@ function bindRecords(sel,arrKey,onChange,numFields=[],isRec=false){
       const ev=inp.tagName==='SELECT'?'change':'input';
       inp.addEventListener(ev,()=>{
         obj[inp.dataset.f]= numFields.includes(inp.dataset.f)?num(inp.value):inp.value;
-        if(arrKey==='factures' && inp.dataset.f==='statut' && inp.value==='Payée' && typeof celebrate==='function'){ celebrate(); }
+        if(arrKey==='factures'){
+          if(inp.dataset.f==='statut'){
+            if(obj.statut==='Payée') obj.paye=facTotalOne(obj);
+            else if(obj.statut==='Impayée'||obj.statut==='En attente') obj.paye=0;
+            const payeInp=tr.querySelector('[data-f="paye"]'); if(payeInp) payeInp.value=(num(obj.paye)?obj.paye:'');
+            if(obj.statut==='Payée' && facTotalOne(obj)>0 && typeof celebrate==='function') celebrate();
+          } else if(['paye','qte','pu'].includes(inp.dataset.f)){
+            const before=obj.statut; obj.statut=facStatutAuto(obj);
+            const sSel=tr.querySelector('[data-f="statut"]'); if(sSel) sSel.value=obj.statut;
+            if(obj.statut==='Payée' && before!=='Payée' && facTotalOne(obj)>0 && typeof celebrate==='function') celebrate();
+          }
+          const rc=tr.querySelector('[data-reste]'); if(rc){ rc.textContent=FCFA(facReste(obj)); rc.style.color=facEnRetard(obj)?'#C0392B':'inherit'; }
+        }
         // live recompute totals
         const totCell=tr.querySelector('[data-tot]'); if(totCell) totCell.textContent=FCFA(num(obj.qte)*num(obj.pu));
         const ttcCell=tr.querySelector('[data-ttc]'); if(ttcCell) ttcCell.textContent=FCFA(num(obj.ht)*(1+num(state.settings.tva)/100));
@@ -16028,13 +16387,13 @@ async function exportExcel(page){
     XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(dep),t('kpi_expenses'));
   }
   if(page==='factures'){
-    const f=[[t('th_num'),t('th_date'),t('th_client'),t('th_desc'),t('th_qty'),t('th_unit_price'),t('th_total'),t('th_status')]];
-    state.factures.forEach(x=>f.push([x.num,frDate(x.date),x.client,x.desc,num(x.qte),num(x.pu),num(x.qte)*num(x.pu),tv(x.statut)]));
+    const f=[[t('th_num'),t('th_date'),t('th_client'),t('th_desc'),t('th_qty'),t('th_unit_price'),t('th_total'),t('c_paid'),t('c_remaining'),t('c_due'),t('th_status')]];
+    state.factures.forEach(x=>f.push([x.num,frDate(x.date),x.client,x.desc,num(x.qte),num(x.pu),facTotalOne(x),facPayeOne(x),facReste(x),x.echeance?frDate(x.echeance):'',tv(x.statut)]));
     XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(f),t('nav_invoicing'));
   }
   if(page==='commandes'){
     const c=[[t('th_num'),t('th_date'),t('th_client'),t('c_product'),t('th_qty'),t('th_unit_price'),t('th_total'),t('th_status')]];
-    state.commandes.forEach(x=>c.push([x.num,frDate(x.date),x.client,x.produit,num(x.qte),num(x.pu),num(x.qte)*num(x.pu),tv(x.statut)]));
+    state.commandes.forEach(x=>c.push([x.num,frDate(x.date),x.client,facLignes(x).map(l=>l.desc).filter(Boolean).join(' + ')||x.produit||'',facLignes(x).reduce((s,l)=>s+num(l.qte),0),'',facTotalOne(x),tv(x.statut)]));
     XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(c),t('nav_orders'));
   }
   if(page==='clients'){
@@ -16079,20 +16438,38 @@ async function exportBizplanPDF(){
 /* ============================================================
    IMPORT DU LOGO PERSONNALISÉ
    ============================================================ */
+// Compresse/redimensionne une image avant stockage (évite de saturer localStorage ~5 Mo).
+// SVG conservé tel quel (vectoriel, léger). Sinon : redimensionné à maxDim px puis ré-encodé PNG.
+function pbCompressImage(file, maxDim, cb){
+  if(!file){ cb(null); return; }
+  if(file.type==='image/svg+xml'){ const r=new FileReader(); r.onload=e=>cb(e.target.result); r.onerror=()=>cb(null); r.readAsDataURL(file); return; }
+  const r=new FileReader();
+  r.onload=e=>{
+    const img=new Image();
+    img.onload=()=>{
+      let w=img.naturalWidth||img.width, h=img.naturalHeight||img.height;
+      const scale=Math.min(1, maxDim/Math.max(w,h)); w=Math.max(1,Math.round(w*scale)); h=Math.max(1,Math.round(h*scale));
+      try{ const cv=document.createElement('canvas'); cv.width=w; cv.height=h; cv.getContext('2d').drawImage(img,0,0,w,h); cb(cv.toDataURL('image/png')); }
+      catch(_){ cb(e.target.result); }
+    };
+    img.onerror=()=>cb(e.target.result);
+    img.src=e.target.result;
+  };
+  r.onerror=()=>cb(null);
+  r.readAsDataURL(file);
+}
 function handleLogoImport(file, onDone){
   if(!file){ return; }
   const okTypes=['image/png','image/jpeg','image/svg+xml','image/webp'];
   if(!okTypes.includes(file.type)){ toast('Format non supporté (PNG, JPG ou SVG)'); return; }
-  if(file.size > 1024*1024){ toast('Image trop lourde (max 1 Mo)'); return; }
-  const reader=new FileReader();
-  reader.onload=e=>{
-    state.settings.logo=e.target.result; // data URL base64
+  if(file.size > 4*1024*1024){ toast('Image trop lourde (max 4 Mo)'); return; }
+  pbCompressImage(file, 256, dataURL=>{
+    if(!dataURL){ toast('Erreur de lecture du fichier'); return; }
+    state.settings.logo=dataURL;
     save(); applyBrand();
     toast(t('toast_logo_ok'));
     if(onDone) onDone();
-  };
-  reader.onerror=()=>toast('Erreur de lecture du fichier');
-  reader.readAsDataURL(file);
+  });
 }
 function removeLogo(onDone){
   state.settings.logo=null; save(); applyBrand();
@@ -16653,8 +17030,8 @@ function celebrate(){
 /* ===== Notifications / rappels (in-app + option navigateur) ===== */
 function notifList(){
   const out=[]; const today=todayISO();
-  const unpaid=state.factures.filter(f=>['Impayée','En attente','Partiellement payée'].includes(f.statut));
-  if(unpaid.length){ const tot=unpaid.reduce((s,f)=>s+num(f.qte)*num(f.pu),0); out.push({ic:'📄',txt:tf('nt_invoices',{n:unpaid.length,m:FCFA(tot)}),page:'factures'}); }
+  const unpaid=state.factures.filter(f=>facReste(f)>0);
+  if(unpaid.length){ const tot=unpaid.reduce((s,f)=>s+facReste(f),0); const late=unpaid.filter(facEnRetard).length; out.push({ic:late?'⏰':'📄',txt: late? tf('nt_invoices_late',{n:unpaid.length,m:FCFA(tot),l:late}) : tf('nt_invoices',{n:unpaid.length,m:FCFA(tot)}),page:'factures'}); }
   const orders=state.commandes.filter(c=>c.statut==='En préparation'||c.statut==='Expédiée');
   if(orders.length) out.push({ic:'📦',txt:tf('nt_orders',{n:orders.length}),page:'commandes'});
   const relances=state.prospects.filter(p=>p.relance && String(p.relance)<=today);
@@ -17189,7 +17566,9 @@ applyI18n();
 initLangPicker();
 applyDarkMode();
 const _tg=document.getElementById('themeToggle'); if(_tg) _tg.addEventListener('click',toggleDarkMode);
-pbUpdateBadge(); pbReverify(); pbAutoActivateFromURL(); cloudInit();
+pbUpdateBadge(); pbReverify(); pbAutoActivateFromURL();
+// Supabase est chargé en `defer` : on initialise le cloud une fois le DOM prêt (script chargé).
+if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', cloudInit); } else { cloudInit(); }
 (function(){ const nb=document.getElementById('notifBtn'); if(nb) nb.addEventListener('click',e=>{ e.stopPropagation(); notifToggle(); }); document.addEventListener('click',e=>{ if(!(e.target.closest && (e.target.closest('.notif-wrap')||e.target.closest('#notifPanel')))) notifClose(); }); notifRender(); })();
 const navIc=document.getElementById('aiNavIcon'); if(navIc) navIc.innerHTML=aiIcon('accent');
 initScrollNav();
