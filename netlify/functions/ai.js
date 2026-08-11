@@ -38,12 +38,15 @@ exports.handler = async (event) => {
     const groqKey = process.env.GROQ_API_KEY;
     if (!groqKey) return { statusCode: 500, headers: cors, body: JSON.stringify({ error: 'ai_not_configured' }) };
 
-    // 2) Appel à Groq (modèle open-source Llama par défaut).
+    // 2) Appel à Groq.
+    // NB : llama-3.3-70b-versatile a été déprécié par Groq le 17/06/2026 (offres
+    // gratuite et développeur). Modèle par défaut migré vers gpt-oss-120b.
+    // Pour changer sans redéployer le code : variable d'environnement GROQ_MODEL.
     const r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + groqKey },
       body: JSON.stringify({
-        model: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile',
+        model: process.env.GROQ_MODEL || 'openai/gpt-oss-120b',
         messages: Array.isArray(body.messages) ? body.messages : [],
         temperature: (typeof body.temperature === 'number') ? body.temperature : 0.4,
         max_tokens: body.max_tokens || 700
