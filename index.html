@@ -1235,7 +1235,7 @@ function safeChart(ctx, config){
 /* Repère de version : affiché en bas du menu et lisible dans la console.
    Permet de vérifier d'un coup d'œil QUELLE version est réellement en ligne.
    À incrémenter à chaque déploiement. */
-const PB_BUILD = '2026-08-12.1';
+const PB_BUILD = '2026-08-12.3';
 
 /* ---------------- persistence ---------------- */
 const KEY = 'pilote_business_v1';
@@ -1941,22 +1941,12 @@ const I18N = {
   ai_smart_desc_on:{fr:"IA en ligne active (Groq — modèles open-source Llama). Tes données d'activité sont envoyées au service pour générer la réponse.",en:"Online AI active (Groq — open-source Llama models). Your business data is sent to the service to generate the reply.",ar:"الذكاء الاصطناعي عبر الإنترنت مُفعّل (Groq — نماذج Llama مفتوحة المصدر). تُرسَل بيانات نشاطك إلى الخدمة لإنشاء الرد."},
   ai_smart_desc_needkey:{fr:"Active une IA gratuite et performante. Ajoute ta clé gratuite (Groq) via « Options » pour démarrer — l'analyse locale prend le relais en attendant.",en:"Enable a free, powerful AI. Add your free key (Groq) via “Options” to start — local analysis takes over meanwhile.",ar:"فعّل ذكاءً اصطناعيًا مجانيًا وقويًا. أضِف مفتاحك المجاني (Groq) عبر «خيارات» للبدء — يتولّى التحليل المحلي المهمة في هذه الأثناء."},
   ai_smart_desc_off:{fr:"Analyse de tes données sur l'appareil, sans connexion ni partage.",en:"Analyzes your data on-device, with no connection or sharing.",ar:"يحلّل بياناتك على الجهاز، دون اتصال أو مشاركة."},
-  ai_options:{fr:"Options",en:"Options",ar:"خيارات"},
   toast_smart_on:{fr:"🌐 Mode intelligent activé",en:"🌐 Smart mode on",ar:"🌐 تم تفعيل الوضع الذكي"},
   toast_smart_off:{fr:"⚡ Mode analyse locale",en:"⚡ Local analysis mode",ar:"⚡ وضع التحليل المحلي"},
   toast_need_key:{fr:"🔑 Ajoute ta clé gratuite Groq dans Options pour activer l'IA en ligne",en:"🔑 Add your free Groq key in Options to enable the online AI",ar:"🔑 أضِف مفتاح Groq المجاني في الخيارات لتفعيل الذكاء عبر الإنترنت"},
-  ai_opt_title:{fr:"Options de l'IA",en:"AI options",ar:"خيارات الذكاء الاصطناعي"},
-  ai_opt_note:{fr:"Le mode intelligent utilise une IA en ligne gratuite et performante (Groq — modèles open-source Llama). Crée une clé gratuite en 1 minute (sans carte bancaire) et colle-la ci-dessous. Ta clé reste sur ton appareil ; tes données sont envoyées au service uniquement pour générer les réponses.",en:"Smart mode uses a free, powerful online AI (Groq — open-source Llama models). Create a free key in 1 minute (no credit card) and paste it below. Your key stays on your device; your data is sent to the service only to generate replies.",ar:"يستخدم الوضع الذكي ذكاءً اصطناعيًا مجانيًا وقويًا عبر الإنترنت (Groq — نماذج Llama مفتوحة المصدر). أنشئ مفتاحًا مجانيًا في دقيقة (دون بطاقة بنكية) والصقه أدناه. يبقى مفتاحك على جهازك؛ وتُرسَل بياناتك إلى الخدمة فقط لإنشاء الردود."},
-  ai_key_free_link:{fr:"Obtenir une clé gratuite (Groq)",en:"Get a free key (Groq)",ar:"احصل على مفتاح مجاني (Groq)"},
   ai_panel_title:{fr:"IA conversationnelle (avancé)",en:"Conversational AI (advanced)",ar:"ذكاء اصطناعي محادثي (متقدم)"},
   ai_panel_desc:{fr:"Pour des réponses plus libres, colle ta clé API (OpenAI ou compatible). Elle reste sur ton appareil et n'est jamais partagée. Sans clé, l'assistant fonctionne déjà très bien en mode analyse.",en:"For freer answers, paste your API key (OpenAI or compatible). It stays on your device and is never shared. Without a key, the assistant already works great in analysis mode.",ar:"للحصول على إجابات أكثر حرية، الصق مفتاح API (OpenAI أو متوافق). يبقى على جهازك ولا تتم مشاركته أبدًا. بدون مفتاح، يعمل المساعد بشكل ممتاز في وضع التحليل."},
-  ai_key:{fr:"Clé API",en:"API key",ar:"مفتاح API"},
-  ai_key_hint:{fr:"(Groq : gsk_… — reste sur ton appareil)",en:"(Groq: gsk_… — stays on your device)",ar:"(Groq: gsk_… — يبقى على جهازك)"},
-  ai_model:{fr:"Modèle",en:"Model",ar:"النموذج"},
-  ai_url:{fr:"URL de l'API",en:"API URL",ar:"رابط API"},
-  ai_optional:{fr:"(optionnel)",en:"(optional)",ar:"(اختياري)"},
   ai_save:{fr:"Enregistrer",en:"Save",ar:"حفظ"},
-  ai_remove_key:{fr:"Retirer la clé",en:"Remove key",ar:"إزالة المفتاح"},
   ai_input_ph:{fr:"Pose ta question… (ex : combien j'ai gagné ce mois ?)",en:"Ask your question… (e.g. how much did I earn this month?)",ar:"اطرح سؤالك… (مثال: كم ربحت هذا الشهر؟)"},
   ai_greeting:{fr:"Bonjour 👋 Je suis ton assistant. Je peux analyser tes recettes, factures, clients et commandes pour t'aider à piloter ton activité. Pose-moi une question, ou choisis une suggestion ci-dessus.",en:"Hello 👋 I'm your assistant. I can analyze your income, invoices, clients and orders to help you run your business. Ask me a question, or pick a suggestion above.",ar:"مرحبًا 👋 أنا مساعدك. يمكنني تحليل إيراداتك وفواتيرك وعملائك وطلباتك لمساعدتك في إدارة نشاطك. اطرح سؤالاً أو اختر اقتراحًا أعلاه."},
   sug_how:{fr:"Comment va mon activité ?",en:"How is my business doing?",ar:"كيف حال نشاطي؟"},
@@ -16226,14 +16216,6 @@ function bpAgentTyping(on){
   if(on){ box.insertAdjacentHTML('beforeend',`<div class="ai-msg bot" id="bpaTyping"><div class="ai-av bot">${aiIcon()}</div><div class="ai-bubble"><div class="ai-typing"><span></span><span></span><span></span></div></div></div>`); box.scrollTop=box.scrollHeight; }
   else { const x=document.getElementById('bpaTyping'); if(x) x.remove(); }
 }
-async function bpAgentSearch(query){
-  try{
-    const p=pbPremium();
-    const res=await fetch(PB_SEARCH_FN,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({license:(p&&p.key)||'', query})});
-    if(!res.ok) return null;
-    return await res.json();
-  }catch(e){ return null; }
-}
 async function bpAgentAsk(question){
   question=(question||'').trim(); if(!question) return;
   if(!isPremium() && !(state.settings && state.settings.aiKey)){ pbOpenModal(); return; }
@@ -16244,20 +16226,21 @@ async function bpAgentAsk(question){
   const webBtn=document.getElementById('bpaWeb');
   const webOn=!!(webBtn && webBtn.classList.contains('on'));
   const b=state.bizplan;
-  let webBlock='', sourcesHTML='';
-  if(webOn){
-    const web=await bpAgentSearch(question+(b.secteur?(' '+b.secteur):'')+(b.zone?(' '+b.zone):''));
-    if(web && Array.isArray(web.results) && web.results.length){
-      const top=web.results.slice(0,5);
-      webBlock='\n=== RÉSULTATS WEB (cite-les en [1],[2]… avec le titre) ===\n'+top.map((r,i)=>`[${i+1}] ${r.title} — ${r.url}\n${String(r.content||'').slice(0,500)}`).join('\n\n');
-      sourcesHTML=`<div class="bpa-src"><b>${t('bpa_sources')}</b>`+top.map((r,i)=>`[${i+1}] <a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.title||r.url)}</a>`).join('<br>')+`</div>`;
-    }
-  }
+  let sourcesHTML='';
   const bpCtx=[b.projet&&`Projet: ${b.projet}`,b.secteur&&`Secteur: ${b.secteur}`,b.zone&&`Zone: ${b.zone}`,b.cible&&`Cible: ${b.cible}`,b.canaux&&`Canaux: ${b.canaux}`,b.mission&&`Mission: ${b.mission}`].filter(Boolean).join('\n');
-  const sys=`You are an expert business strategist and marketing advisor acting as the entrepreneur's AI agent. Reply ONLY in ${aiLangName()}, concrete and actionable (short paragraphs and bullet points). Propose real marketing ideas, channels, positioning, pricing and business-plan content tailored to the data below. ${webBlock?'Use the WEB RESULTS for current facts and CITE sources as [1],[2]…; never invent sources.':'No live web data this turn — answer from your knowledge and the company data, and flag anything that may be outdated.'}\n\n=== DONNÉES ENTREPRISE ===\n${aiBuildContext()}\n=== BUSINESS PLAN ===\n${bpCtx||'(vide)'}${webBlock}`;
+  // La recherche web est native (outil web_search de Claude) : on ne colle plus de
+  // résultats dans le prompt. Le contexte reste donc identique d'un tour à l'autre,
+  // ce qui permet au cache de prompt de fonctionner (-90 % sur cette partie).
+  const sys=`You are an expert business strategist and marketing advisor acting as the entrepreneur's AI agent. Reply ONLY in ${aiLangName()}, concrete and actionable (short paragraphs and bullet points). Propose real marketing ideas, channels, positioning, pricing and business-plan content tailored to the data below. ${webOn?'You have a web search tool. Use it whenever the answer depends on current facts (prices, market size, competitors, regulations, trends) rather than answering from memory, and cite what you find. Never invent a source or a figure. If search is unavailable, say so and answer from your knowledge.':'Do not search the web this turn — answer from your knowledge and the company data, and flag anything that may be outdated.'}\n\n=== DONNÉES ENTREPRISE ===\n${aiBuildContext()}\n=== BUSINESS PLAN ===\n${bpCtx||'(vide)'}`;
   const msgs=[{role:'system',content:sys}, ...bpAgentHistory.slice(-7).map(m=>({role:m.role==='user'?'user':'assistant',content:String(m.text||'').replace(/<[^>]+>/g,'')}))];
   let answer;
-  try{ answer=esc(String(await aiChatComplete(msgs,{temperature:0.6,max_tokens:800})||t('air_api_empty'))).replace(/\n/g,'<br>'); }
+  try{
+    const out=await aiChatFull(msgs,{temperature:0.6,max_tokens:900,web:webOn});
+    answer=esc(String(out.content||t('air_api_empty'))).replace(/\n/g,'<br>');
+    if(out.sources && out.sources.length){
+      sourcesHTML=`<div class="bpa-src"><b>${t('bpa_sources')}</b>`+out.sources.slice(0,6).map((r,i)=>`[${i+1}] <a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.title||r.url)}</a>`).join('<br>')+`</div>`;
+    }
+  }
   catch(e){ answer=t('air_api_error'); sourcesHTML=''; }
   bpAgentTyping(false);
   bpAgentHistory.push({role:'bot',text:answer,sources:sourcesHTML});
@@ -16914,27 +16897,15 @@ function renderAssistant(){
     <label class="ai-voice-toggle" title="${esc(t('ai_smart_label'))}"><input type="checkbox" id="aiSmartToggle" ${smartOn?'checked':''}><span class="slider"></span></label>
     <span><b>${t('ai_smart_label')}</b></span>
     <span class="ai-badge ${smartOn?(aiAccess?'api':'local'):'local'}">${smartOn?(aiAccess?t('ai_smart_on'):t('ai_smart_premium')):t('ai_smart_off')}</span>
-    <button class="gear" id="aiSettingsBtn">${t('ai_options')}</button>
     <span class="cc-hint" style="flex-basis:100%">${smartOn?(aiAccess?t('ai_smart_desc_on'):t('ai_smart_desc_premium')):t('ai_smart_desc_off')}</span>
   </div>
   <div class="ai-voicebar">
     <label class="ai-voice-toggle"><input type="checkbox" id="aiSpeak" ${state.settings.aiSpeak?'checked':''}><span class="slider"></span></label>
     <span class="cc-hint">🔊 ${t('voice_toggle_read')}</span>
   </div>
-  <div class="ai-apipanel" id="aiApiPanel">
-    <div class="card-title" style="margin-bottom:4px">⚙️ ${t('ai_opt_title')}</div>
-    <div class="card-sub">${t('ai_opt_note')}</div>
-    <div class="field"><label>${t('ai_key')} <span class="hint">${t('ai_key_hint')}</span></label><input id="aiKeyInput" type="password" value="${esc(state.settings.aiKey||'')}" placeholder="gsk_..."></div>
-    <div class="inline-2">
-      <div class="field"><label>${t('ai_model')}</label><input id="aiModelInput" value="${esc(state.settings.aiModel||'llama-3.3-70b-versatile')}" placeholder="llama-3.3-70b-versatile"></div>
-      <div class="field"><label>${t('ai_url')} <span class="hint">${t('ai_optional')}</span></label><input id="aiUrlInput" value="${esc(state.settings.aiUrl||'https://api.groq.com/openai/v1/chat/completions')}"></div>
-    </div>
-    <div style="display:flex;gap:11px;flex-wrap:wrap;align-items:center">
-      <button class="btn btn-primary" id="aiKeySave">${t('ai_save')}</button>
-      ${state.settings.aiKey?`<button class="btn" id="aiKeyClear" style="color:var(--rose-d)">${t('ai_remove_key')}</button>`:''}
-      <a href="https://console.groq.com/keys" target="_blank" rel="noopener" style="color:var(--accent-text);font-size:12.5px;font-weight:600;text-decoration:underline;text-underline-offset:2px">${t('ai_key_free_link')} ↗</a>
-    </div>
-  </div>
+<!-- Aucune clé à configurer : l'IA est incluse dans l'abonnement et la clé du
+       propriétaire reste côté serveur (fonction Netlify /ai). Ne JAMAIS remettre
+       de champ « clé API » ici : la clé serait lisible par tous les visiteurs. -->
   <div class="ai-wrap">
     <div class="ai-suggest" id="aiSuggest">
       ${suggestions.map(s=>`<button class="ai-chip" data-q="${esc(s.q)}">${esc(s.q)}</button>`).join('')}
@@ -17050,15 +17021,17 @@ function aiStartListening(){
 }
 
 /* ---------------- MODE INTELLIGENT (IA en ligne) ----------------
-   Moteur : tout endpoint compatible OpenAI. Par défaut Groq (gratuit, ultra-rapide,
-   modèles open-source Llama). La clé gratuite est requise et reste sur l'appareil.
-   En cas d'échec réseau, aiAsk() bascule automatiquement sur l'analyse locale.        */
+   Abonné Premium : le proxy serveur /.netlify/functions/ai appelle CLAUDE (meilleur en
+   français, recherche web native, cache de prompt) et bascule tout seul sur Groq si
+   Claude est indisponible ou trop lent. L'app n'a donc aucune clé à connaître.
+   Clé perso (BYOK) : tout endpoint compatible OpenAI, la clé reste sur l'appareil.
+   En cas d'échec réseau, aiAsk() bascule sur l'analyse locale.                        */
 const AI_DEFAULT_URL = 'https://api.groq.com/openai/v1/chat/completions';
 // llama-3.3-70b-versatile a été déprécié par Groq le 17/06/2026 → migré vers gpt-oss-120b.
 const AI_DEFAULT_MODEL = 'openai/gpt-oss-120b';
-// Appel bas niveau partagé (assistant + générateur de messages).
-// 1) clé perso (BYOK) -> appel direct ; 2) abonné Premium -> proxy IA (clé du propriétaire, côté serveur).
-async function aiChatComplete(messages, opts){
+// Appel bas niveau partagé. Renvoie {content, sources, engine}.
+// opts.web === true demande la recherche web (Claude la fait nativement).
+async function aiChatFull(messages, opts){
   opts = opts || {};
   const temp=(opts.temperature!=null?opts.temperature:0.4), maxt=(opts.max_tokens||700);
   if(state.settings && state.settings.aiKey){
@@ -17066,16 +17039,22 @@ async function aiChatComplete(messages, opts){
     const res = await fetch(url,{ method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+state.settings.aiKey}, body:JSON.stringify({model, messages, temperature:temp, max_tokens:maxt}) });
     if(!res.ok) throw new Error('API '+res.status);
     const data = await res.json();
-    return (data.choices?.[0]?.message?.content || data.response || data.text || '').trim();
+    return { content:(data.choices?.[0]?.message?.content || data.response || data.text || '').trim(), sources:[], engine:'byok' };
   }
   if(isPremium()){
-    const res = await fetch(PB_AI_FN,{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({messages, license:(pbPremium()||{}).key, temperature:temp, max_tokens:maxt}) });
+    const res = await fetch(PB_AI_FN,{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({messages, license:(pbPremium()||{}).key, temperature:temp, max_tokens:maxt, web:opts.web===true}) });
     if(!res.ok) throw new Error('AI '+res.status);
     const data = await res.json();
-    return (data.choices?.[0]?.message?.content || data.content || data.response || '').trim();
+    if(data.refused) return { content:t('ai_refused'), sources:[], engine:'claude' };
+    return {
+      content:(data.content || data.choices?.[0]?.message?.content || data.response || '').trim(),
+      sources:Array.isArray(data.sources)?data.sources:[],
+      engine:data.engine||''
+    };
   }
   throw new Error('no-access');
 }
+async function aiChatComplete(messages, opts){ return (await aiChatFull(messages, opts)).content; }
 
 /* ============================================================
    PREMIUM / ABONNEMENT (freemium) — vérif. via fonction Netlify (Chariow)
@@ -17121,6 +17100,7 @@ Object.assign(I18N, {
   bpa_ph:{fr:"Demande des idées marketing, une analyse, une recherche…",en:"Ask for marketing ideas, analysis, research…",ar:"اطلب أفكارًا تسويقية، تحليلًا، بحثًا…"},
   bpa_web_title:{fr:"Recherche web (activer / désactiver)",en:"Web search (toggle on / off)",ar:"البحث على الويب (تشغيل / إيقاف)"},
   bpa_sources:{fr:"Sources :",en:"Sources:",ar:"المصادر:"},
+  ai_refused:{fr:"Je ne peux pas traiter cette demande. Reformule-la ou pose une question liée à ton activité.",en:"I can't handle this request. Please rephrase it or ask something related to your business.",ar:"لا يمكنني معالجة هذا الطلب. أعد صياغته أو اطرح سؤالًا متعلقًا بنشاطك."},
   bpa_chip_ideas:{fr:"Idées marketing",en:"Marketing ideas",ar:"أفكار تسويقية"},
   bpa_chip_compet:{fr:"Analyse de la concurrence",en:"Competitor analysis",ar:"تحليل المنافسين"},
   bpa_chip_value:{fr:"Rédige ma proposition de valeur",en:"Write my value proposition",ar:"اكتب عرض القيمة الخاص بي"},
@@ -17198,7 +17178,7 @@ Object.assign(I18N, {
 // ----- Config (à renseigner par le propriétaire après création du produit Chariow) -----
 const PB_LICENSE_FN = '/.netlify/functions/verify-license';
 const PB_AI_FN      = '/.netlify/functions/ai';
-const PB_SEARCH_FN  = '/.netlify/functions/search';
+// (plus de fonction "search" : la recherche web est native côté Claude, dans /ai)
 const PB_CHARIOW_FN = '/.netlify/functions/chariow-sync';
 const PB_REFCLAIM_FN= '/.netlify/functions/referral-claim';
 const PB_REFREG_FN  = '/.netlify/functions/referral-register';
@@ -17754,13 +17734,10 @@ Object.assign(I18N, {
   air_over_watch:{fr:"⚠️ Surveille tes dépenses.",en:"⚠️ Keep an eye on your expenses.",ar:"⚠️ انتبه لمصروفاتك."},
 
   air_fallback:{fr:"Je n'ai pas tout compris 🤔 mais je peux t'aider sur :<br>• Ton <b>chiffre d'affaires</b> et ton <b>bénéfice</b><br>• Tes <b>factures impayées</b><br>• Ton <b>meilleur mois</b> ou <b>meilleur client</b><br>• Tes <b>prospects à relancer</b><br>• Un <b>conseil</b> personnalisé<br><br>Reformule avec un de ces mots 😊",en:"I didn't quite get that 🤔 but I can help with:<br>• Your <b>revenue</b> and <b>profit</b><br>• Your <b>unpaid invoices</b><br>• Your <b>best month</b> or <b>best client</b><br>• Your <b>prospects to follow up</b><br>• A personalized <b>tip</b><br><br>Rephrase using one of these words 😊",ar:"لم أفهم تمامًا 🤔 لكن يمكنني المساعدة في:<br>• <b>رقم أعمالك</b> و<b>ربحك</b><br>• <b>فواتيرك غير المدفوعة</b><br>• <b>أفضل شهر</b> أو <b>أفضل عميل</b><br>• <b>العملاء المحتملين للمتابعة</b><br>• <b>نصيحة</b> مخصّصة<br><br>أعِد الصياغة بإحدى هذه الكلمات 😊"},
-  air_fallback_api:{fr:"<br><br>💡 Pour des réponses plus libres, active l'IA avancée avec ta propre clé (bouton en haut).",en:"<br><br>💡 For more open answers, enable the advanced AI with your own key (button at the top).",ar:"<br><br>💡 للحصول على إجابات أكثر مرونة، فعّل الذكاء الاصطناعي المتقدّم بمفتاحك الخاص (الزر في الأعلى)."},
+  air_fallback_api:{fr:"<br><br>💡 Pour des réponses plus libres et à jour, passe Premium : l'IA en ligne est incluse, rien à configurer.",en:"<br><br>💡 For more open, up-to-date answers, go Premium: the online AI is included, nothing to set up.",ar:"<br><br>💡 للحصول على إجابات أكثر مرونة وحداثة، اشترك في بريميوم: الذكاء الاصطناعي عبر الإنترنت مُضمَّن، دون أي إعداد."},
 
   air_api_error:{fr:"⚠️ Impossible de joindre l'IA (vérifie ta clé ou ta connexion). En attendant, voici mon analyse :",en:"⚠️ Couldn't reach the AI (check your key or connection). Meanwhile, here's my analysis:",ar:"⚠️ تعذّر الوصول إلى الذكاء الاصطناعي (تحقق من المفتاح أو الاتصال). في هذه الأثناء، إليك تحليلي:"},
   air_api_empty:{fr:"Réponse vide.",en:"Empty response.",ar:"ردّ فارغ."},
-  toast_ai_on:{fr:"✅ IA avancée activée",en:"✅ Advanced AI enabled",ar:"✅ تم تفعيل الذكاء الاصطناعي المتقدّم"},
-  toast_ai_key_saved:{fr:"Clé enregistrée",en:"Key saved",ar:"تم حفظ المفتاح"},
-  toast_ai_key_removed:{fr:"Clé retirée — mode analyse",en:"Key removed — analysis mode",ar:"تمت إزالة المفتاح — وضع التحليل"},
 });
 
 const MONTHS_I18N = {
@@ -18009,11 +17986,10 @@ function bindAssistant(){
   input.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); send(); }});
   input.addEventListener('input',()=>{ input.style.height='auto'; input.style.height=Math.min(120,input.scrollHeight)+'px'; });
   document.querySelectorAll('#aiSuggest .ai-chip').forEach(c=>c.addEventListener('click',()=>aiAsk(c.dataset.q)));
-  // panneau clé API
   // bascule « Mode intelligent » (IA en ligne) <-> analyse locale
   const smartTg=$('#aiSmartToggle');
   if(smartTg) smartTg.addEventListener('change',()=>{
-    // l'IA en ligne est une fonction Premium : sans clé perso ni abonnement -> modale d'upgrade
+    // l'IA en ligne est incluse dans l'abonnement : sans abonnement -> modale d'upgrade
     if(smartTg.checked && !(state.settings.aiKey) && !isPremium()){
       smartTg.checked=false; state.settings.aiSmart=false; save();
       pbOpenModal(); return;
@@ -18022,17 +17998,6 @@ function bindAssistant(){
     toast(smartTg.checked?t('toast_smart_on'):t('toast_smart_off'));
     go('assistant');
   });
-  const gear=$('#aiSettingsBtn'); const panel=$('#aiApiPanel');
-  if(gear) gear.addEventListener('click',()=>panel.classList.toggle('show'));
-  const ks=$('#aiKeySave');
-  if(ks) ks.addEventListener('click',()=>{
-    state.settings.aiKey=$('#aiKeyInput').value.trim();
-    state.settings.aiModel=$('#aiModelInput').value.trim()||AI_DEFAULT_MODEL;
-    state.settings.aiUrl=$('#aiUrlInput').value.trim()||'https://api.groq.com/openai/v1/chat/completions';
-    save(); toast(state.settings.aiKey?t('toast_ai_on'):t('toast_ai_key_saved')); go('assistant');
-  });
-  const kc=$('#aiKeyClear');
-  if(kc) kc.addEventListener('click',()=>{ state.settings.aiKey=null; save(); toast(t('toast_ai_key_removed')); go('assistant'); });
   // micro (reconnaissance vocale)
   const mic=$('#aiMic');
   if(mic) mic.addEventListener('click',aiStartListening);
