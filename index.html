@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -6,7 +6,12 @@
 <title>Pilote Business — Tableau de bord entrepreneur</title>
 
 <!-- ===== PWA / iOS (installable sur l'écran d'accueil) ===== -->
-<meta name="theme-color" content="#E8A0BF">
+<!-- Manifeste RÉEL (requis pour l'installation sur ordinateur : Chrome refuse les blob:) -->
+<link rel="manifest" href="/manifest.webmanifest">
+<!-- Barre d'état : suit le thème clair/sombre du téléphone -->
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#FDF5F9">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0C0913">
+<meta name="theme-color" content="#FDF5F9">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -14,8 +19,8 @@
 <meta name="application-name" content="Pilote Business">
 <meta name="format-detection" content="telephone=no">
 <!-- Icône d'accueil iOS (SVG en data-URI : logo Pilote Business) -->
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23E8A0BF'/%3E%3Cstop offset='1' stop-color='%23D67BA0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='180' height='180' rx='40' fill='url(%23g)'/%3E%3Cpath d='M48 48v84h84' fill='none' stroke='%23fff' stroke-width='9' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M64 104l20-22 16 16 24-30' fill='none' stroke='%23fff' stroke-width='9' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23E8A0BF'/%3E%3Cstop offset='1' stop-color='%23D67BA0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='180' height='180' rx='40' fill='url(%23g)'/%3E%3Cpath d='M48 48v84h84' fill='none' stroke='%23fff' stroke-width='9' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M64 104l20-22 16 16 24-30' fill='none' stroke='%23fff' stroke-width='9' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<link rel="icon" type="image/png" href="/favicon.png">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -143,6 +148,11 @@ button.nav-label[aria-expanded="true"] .chev{transform:rotate(180deg)}
 .nav-item:hover .ic{background:var(--card)}
 .nav-item.active{background:var(--grad-brand); color:#fff; box-shadow:0 10px 26px rgba(193,90,160,.40); font-weight:600}
 .nav-item.active .ic{background:rgba(255,255,255,.24); color:#fff}
+.install-btn{display:none;align-items:center;gap:8px;width:100%;margin-top:10px;padding:9px 12px;border-radius:11px;cursor:pointer;
+  font-family:'Outfit';font-size:12.5px;font-weight:600;color:var(--accent-text);
+  background:var(--rose-xl);border:1.5px dashed var(--rose);transition:background .16s}
+.install-btn:hover{background:var(--rose-l)}
+.install-btn svg{width:15px;height:15px;flex:0 0 auto}
 .build-tag{margin-top:7px;font-size:10px;letter-spacing:.6px;color:var(--ink-faint);opacity:.8;font-variant-numeric:tabular-nums}
 .sidebar-foot{margin-top:auto; padding:14px 12px 4px; font-size:11px; color:var(--ink-faint); line-height:1.5}
 
@@ -391,14 +401,24 @@ html[data-theme="dark"] .pill.blue{color:#92C8F0}
 @keyframes spWipe{to{clip-path:inset(0 0 0 0)}}
 @keyframes spUp{0%{opacity:0;transform:translateY(9px)}100%{opacity:1;transform:translateY(0)}}
 @keyframes spFill{to{width:100%}}
-/* Rideau : l'écran se retire vers le haut (motif « preloader ») */
-.cover.sp-out{animation:spCurtain .72s cubic-bezier(.76,0,.24,1) forwards;pointer-events:none}
-@keyframes spCurtain{to{transform:translateY(-100%);opacity:.2}}
+/* Ouverture et fermeture en fondu : l'écran apparaît puis s'efface en douceur. */
+.cover{animation:spFadeIn .5s ease-out both}
+@keyframes spFadeIn{from{opacity:0}to{opacity:1}}
+.cover.sp-out{animation:spFadeOut .75s cubic-bezier(.4,0,.2,1) forwards;pointer-events:none}
+@keyframes spFadeOut{
+  0%{opacity:1;transform:scale(1);filter:blur(0)}
+  100%{opacity:0;transform:scale(1.06);filter:blur(6px)}
+}
+/* le contenu s'efface légèrement avant le fond : sortie plus douce */
+.cover.sp-out .sp-stage{animation:spStageOut .5s ease-in forwards}
+@keyframes spStageOut{to{opacity:0;transform:translateY(-8px)}}
 @media(prefers-reduced-motion:reduce){
   .sp-mark,.sp-name,.sp-tag,.sp-bar i,.sp-mark path,.sp-mark circle{animation:none!important}
   .sp-name{clip-path:none}.sp-tag{opacity:1}.sp-bar i{width:100%}
   .sp-mark path,.sp-mark circle{stroke-dashoffset:0}
+  .cover{animation:none}
   .cover.sp-out{animation:none;opacity:0;transition:opacity .3s}
+  .cover.sp-out .sp-stage{animation:none}
 }
 .cover-inner{position:relative;z-index:2;text-align:center;padding:34px;max-width:560px;animation:coverUp .9s cubic-bezier(.16,1,.3,1)}
 @keyframes coverUp{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
@@ -497,12 +517,28 @@ html[data-theme="dark"] .pill.blue{color:#92C8F0}
 .ai-bubble b{font-weight:700}
 .ai-bubble .stat{display:block;margin:7px 0;padding:9px 12px;background:var(--rose-xl);border-radius:10px;font-variant-numeric:tabular-nums}
 .ai-msg.bot .ai-bubble .stat{border:1px solid var(--rose-l)}
-.ai-bar{position:sticky;bottom:0;z-index:6;display:flex;gap:10px;align-items:flex-end;padding:11px;margin-top:8px;background:var(--surface);backdrop-filter:blur(22px) saturate(1.4);-webkit-backdrop-filter:blur(22px) saturate(1.4);border:1px solid var(--glass-border);border-radius:22px;box-shadow:var(--shadow-lg)}
-.ai-bar textarea{flex:1;resize:none;min-height:48px;max-height:140px;border-radius:15px;padding:13px 15px;font-family:'Outfit';font-size:14px;background:var(--field-bg)}
-.ai-bar textarea:focus{background:var(--card)}
-.ai-send{width:46px;height:46px;border-radius:14px;border:none;background:var(--grad-brand);color:#fff;cursor:pointer;display:grid;place-items:center;flex-shrink:0;transition:all .18s;box-shadow:0 4px 14px rgba(193,90,160,.4)}
-.ai-send:hover{transform:translateY(-1px)}
-.ai-send svg{width:20px;height:20px}
+/* ===== Zone de saisie IA — épurée : un seul contour, qui s'anime au focus ===== */
+.ai-bar{position:sticky;bottom:0;z-index:6;display:flex;gap:8px;align-items:flex-end;
+  padding:7px 7px 7px 8px;margin-top:10px;
+  background:var(--card);
+  backdrop-filter:blur(22px) saturate(1.4);-webkit-backdrop-filter:blur(22px) saturate(1.4);
+  border:1.5px solid var(--line);border-radius:20px;
+  box-shadow:0 2px 10px rgba(80,40,90,.05);
+  transition:border-color .2s, box-shadow .25s}
+/* le contour réagit quand on écrit : rien ne bouge, tout reste calme */
+.ai-bar:focus-within{border-color:var(--rose);box-shadow:0 0 0 4px var(--rose-l),0 8px 26px rgba(193,90,160,.14)}
+.ai-bar textarea{flex:1;resize:none;min-height:44px;max-height:150px;
+  border:none!important;outline:none!important;box-shadow:none!important;
+  background:transparent!important;border-radius:14px;
+  padding:12px 6px 12px 10px;font-family:'Outfit';font-size:14.5px;line-height:1.5;color:var(--ink)}
+.ai-bar textarea::placeholder{color:var(--ink-faint)}
+.ai-send{width:40px;height:40px;border-radius:13px;border:none;background:var(--grad-brand);color:#fff;
+  cursor:pointer;display:grid;place-items:center;flex-shrink:0;align-self:flex-end;margin-bottom:2px;
+  transition:transform .16s, box-shadow .16s, opacity .16s;
+  box-shadow:0 3px 12px rgba(193,90,160,.34)}
+.ai-send:hover{transform:translateY(-1px) scale(1.04);box-shadow:0 6px 18px rgba(193,90,160,.46)}
+.ai-send:active{transform:scale(.95)}
+.ai-send svg{width:18px;height:18px}
 .ai-typing{display:inline-flex;gap:4px;padding:4px 0}
 .ai-typing span{width:7px;height:7px;border-radius:50%;background:var(--plum-l);animation:blink 1.2s infinite}
 .ai-typing span:nth-child(2){animation-delay:.2s}.ai-typing span:nth-child(3){animation-delay:.4s}
@@ -526,6 +562,13 @@ html[data-theme="dark"] .ai-badge.api{color:#92C8F0}
 .ai-mic{width:46px;height:46px;border-radius:14px;border:1.5px solid var(--rose-l);background:var(--card);color:var(--accent-text);cursor:pointer;display:grid;place-items:center;flex-shrink:0;transition:all .18s}
 .ai-mic svg{width:20px;height:20px}
 .ai-mic:hover{background:var(--rose-l);transform:translateY(-1px)}
+/* Dans la barre de saisie : boutons secondaires discrets, alignés sur l'envoi */
+.ai-bar .ai-mic{width:38px;height:38px;border-radius:12px;border:none;background:transparent;
+  align-self:flex-end;margin-bottom:3px;box-shadow:none;font-size:15px}
+.ai-bar .ai-mic svg{width:18px;height:18px}
+.ai-bar .ai-mic:hover{background:var(--rose-xl);transform:none}
+.ai-bar .bpa-web{background:transparent;border:none;opacity:.4}
+.ai-bar .bpa-web.on{background:var(--rose-l);color:var(--accent-text);opacity:1}
 .ai-mic.listening{background:var(--grad-brand);color:#fff;border-color:transparent;animation:micPulse 1.2s ease-in-out infinite}
 @keyframes micPulse{0%,100%{box-shadow:0 0 0 0 rgba(193,90,160,.5)}50%{box-shadow:0 0 0 8px rgba(193,90,160,0)}}
 
@@ -915,6 +958,10 @@ html[dir=rtl] .ai-msg.bot{flex-direction:row-reverse}
     </div>
     <div class="sidebar-foot">
       💾 <span data-i18n="foot_saved">Tes données sont enregistrées automatiquement sur cet appareil.</span>
+      <button class="install-btn" id="installBtn" type="button" onclick="pbInstallApp()" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M8 11l4 4 4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+        <span data-i18n="inst_btn">Installer l'application</span>
+      </button>
       <div class="build-tag" id="buildTag"></div>
     </div>
   </aside>
@@ -1092,8 +1139,10 @@ function applyDarkMode(){
   if(btn) btn.innerHTML = dark ? THEME_SUN : THEME_MOON;
   applyTheme();
   applyChartTheme();
-  const m=document.querySelector('meta[name="theme-color"]');
-  if(m) m.setAttribute('content', dark ? '#0C0913' : '#E8A0BF');
+  // barre d'état du téléphone : on cible la balise SANS media (les deux autres
+  // servent de repli quand le JS n'a pas encore tourné)
+  const m=document.querySelector('meta[name="theme-color"]:not([media])');
+  if(m) m.setAttribute('content', dark ? '#0C0913' : '#FDF5F9');
 }
 function toggleDarkMode(){
   const cur = document.documentElement.getAttribute('data-theme')==='dark';
@@ -1186,7 +1235,7 @@ function safeChart(ctx, config){
 /* Repère de version : affiché en bas du menu et lisible dans la console.
    Permet de vérifier d'un coup d'œil QUELLE version est réellement en ligne.
    À incrémenter à chaque déploiement. */
-const PB_BUILD = '2026-08-09.1';
+const PB_BUILD = '2026-08-12.1';
 
 /* ---------------- persistence ---------------- */
 const KEY = 'pilote_business_v1';
@@ -2119,6 +2168,8 @@ const I18N = {
   ref_reg_already_registered:{fr:"Un numéro est déjà lié à ce code. Contacte-nous pour le modifier.",en:"A number is already linked to this code. Contact us to change it.",ar:"يوجد رقم مرتبط بهذا الرمز. تواصل معنا لتغييره."},
   ref_reg_not_configured:{fr:"Le service de paiement n'est pas encore activé.",en:"The payout service isn't enabled yet.",ar:"خدمة الدفع غير مفعّلة بعد."},
   ref_reg_store_error:{fr:"Enregistrement impossible pour le moment.",en:"Couldn't save right now.",ar:"تعذّر الحفظ الآن."},
+  ref_reg_bad_key:{fr:"Service mal configuré (clé serveur refusée). Contacte-nous, on corrige ça vite.",en:"Service misconfigured (server key rejected). Contact us, we'll fix it quickly.",ar:"الخدمة غير مهيأة (مفتاح الخادم مرفوض). تواصل معنا."},
+  ref_reg_no_table:{fr:"Service en cours d'installation. Réessaie dans un moment.",en:"Service is being set up. Try again shortly.",ar:"الخدمة قيد الإعداد. حاول بعد قليل."},
   ref_reg_server:{fr:"Connexion impossible. Vérifie ta connexion internet.",en:"Connection failed. Check your internet connection.",ar:"فشل الاتصال. تحقق من اتصالك."},
   ref_reg_unavailable:{fr:"Le service de parrainage n'est pas encore disponible. Réessaie plus tard.",en:"The referral service isn't available yet. Try again later.",ar:"خدمة الإحالة غير متاحة بعد. حاول لاحقًا."},
   ref_reg_num:{fr:"Numéro :",en:"Number:",ar:"الرقم:"},
@@ -2248,6 +2299,9 @@ const I18N = {
   acct_title:{fr:"Compte de l'entreprise",en:"Business account",ar:"حساب الشركة"},
   acct_treasury:{fr:"Trésorerie encaissée",en:"Cash collected",ar:"السيولة المحصّلة"},
   acct_receivable:{fr:"À encaisser (factures)",en:"To collect (invoices)",ar:"للتحصيل (فواتير)"},
+  inst_btn:{fr:"Installer l'application",en:"Install the app",ar:"تثبيت التطبيق",zh:"安装应用",pt:"Instalar a app",es:"Instalar la app",it:"Installa l'app",de:"App installieren",ja:"アプリをインストール"},
+  inst_ok:{fr:"✅ Application installée sur ton appareil",en:"✅ App installed on your device",ar:"✅ تم تثبيت التطبيق"},
+  inst_hint:{fr:"Utilise le menu de ton navigateur → « Installer Pilote Business ».",en:"Use your browser menu → “Install Pilote Business”.",ar:"من قائمة المتصفح → «تثبيت Pilote Business»."},
   nt_daily_on:{fr:"Rappels quotidiens activés",en:"Daily reminders on",ar:"التذكيرات اليومية مفعّلة"},
   nt_daily_off:{fr:"Rappels quotidiens désactivés",en:"Daily reminders off",ar:"التذكيرات اليومية متوقفة"},
   nt_invoices_late:{fr:"{n} facture(s) à encaisser ({m}) · {l} en retard",en:"{n} invoice(s) to collect ({m}) · {l} overdue",ar:"{n} فاتورة للتحصيل ({m}) · {l} متأخرة"},
@@ -17355,7 +17409,12 @@ async function pbRefRegister(){
     if(r.status===404){ setFb(t('ref_reg_unavailable'),'bad'); return; }
     let d=null; try{ d=await r.json(); }catch(_){ setFb(t('ref_reg_unavailable'),'bad'); return; }
     if(d && d.ok){ state.settings.refPhoneSet=true; save(); setFb(t('ref_reg_ok'),'ok'); pbRefStatus(); }
-    else setFb(t('ref_reg_'+((d&&d.reason)||'server')) || t('ref_reg_server'),'bad');
+    else{
+      // La cause technique va dans la console (pour le propriétaire),
+      // l'utilisateur ne voit qu'un message clair.
+      if(d && d.detail) console.warn('Parrainage — cause :', d.reason, d.http, d.detail);
+      setFb(t('ref_reg_'+((d&&d.reason)||'server')) || t('ref_reg_server'),'bad');
+    }
   }catch(e){ setFb(t('ref_reg_server'),'bad'); }
 }
 async function pbRefStatus(){
@@ -18080,51 +18139,43 @@ splashRun(afterSplash);
    ============================================================ */
 (function initPWA(){
   try{
-    // Icône de l'app (SVG -> data URI) réutilisée pour le manifest
-    const iconSvg = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23E8A0BF'/%3E%3Cstop offset='1' stop-color='%23D67BA0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='180' height='180' rx='40' fill='url(%23g)'/%3E%3Cpath d='M48 48v84h84' fill='none' stroke='%23fff' stroke-width='9' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M64 104l20-22 16 16 24-30' fill='none' stroke='%23fff' stroke-width='9' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E";
-    const brandName = (typeof state!=='undefined' && state.settings && state.settings.brand) ? state.settings.brand : 'Pilote Business';
-    const manifest = {
-      name: brandName,
-      short_name: brandName.length>12 ? brandName.slice(0,12) : brandName,
-      description: "Tableau de bord de gestion pour entrepreneurs",
-      start_url: ".",
-      scope: ".",
-      display: "standalone",
-      orientation: "any",
-      background_color: "#FDF5F9",
-      theme_color: "#E8A0BF",
-      icons: [
-        { src: iconSvg, sizes: "180x180", type: "image/svg+xml", purpose: "any" },
-        { src: iconSvg, sizes: "512x512", type: "image/svg+xml", purpose: "any maskable" }
-      ]
-    };
-    const mBlob = new Blob([JSON.stringify(manifest)], {type:'application/manifest+json'});
-    const mURL = URL.createObjectURL(mBlob);
-    let link = document.querySelector('link[rel="manifest"]');
-    if(!link){ link=document.createElement('link'); link.rel='manifest'; document.head.appendChild(link); }
-    link.href = mURL;
-
-    // Service worker minimal pour le mode hors-ligne (cache "network-first" léger).
-    // Ne s'enregistre qu'en contexte sécurisé (https) — sinon ignoré silencieusement.
-    if('serviceWorker' in navigator && (location.protocol==='https:' || location.hostname==='localhost')){
-      const swCode = `
-        const CACHE='pilote-business-v1';
-        self.addEventListener('install', e=>{ self.skipWaiting(); });
-        self.addEventListener('activate', e=>{ e.waitUntil(self.clients.claim()); });
-        self.addEventListener('fetch', e=>{
-          if(e.request.method!=='GET') return;
-          e.respondWith(
-            fetch(e.request).then(res=>{
-              const copy=res.clone();
-              caches.open(CACHE).then(c=>{ try{c.put(e.request,copy);}catch(_){} });
-              return res;
-            }).catch(()=> caches.match(e.request).then(r=> r || caches.match('./')))
-          );
-        });`;
-      const swBlob = new Blob([swCode], {type:'text/javascript'});
-      const swURL = URL.createObjectURL(swBlob);
-      navigator.serviceWorker.register(swURL).catch(()=>{ /* silencieux */ });
+    // Manifeste et service worker sont de VRAIS fichiers (obligatoire : Chrome
+    // refuse les blob: et les icones SVG pour l'installation sur ordinateur).
+    if('serviceWorker' in navigator && location.protocol==='https:'){
+      navigator.serviceWorker.register('/sw.js').catch(()=>{ /* silencieux */ });
     }
+
+    // Couleur de la barre d'etat synchronisee avec le theme (Android + PWA).
+    window.pbSyncThemeColor=function(){
+      try{
+        var dark = document.documentElement.getAttribute('data-theme')==='dark';
+        var col  = dark ? '#0C0913' : '#FDF5F9';
+        var m = document.querySelector('meta[name="theme-color"]:not([media])');
+        if(!m){ m=document.createElement('meta'); m.name='theme-color'; document.head.appendChild(m); }
+        m.setAttribute('content', col);
+      }catch(e){}
+    };
+    pbSyncThemeColor();
+
+    // ---- Installation sur ordinateur (comme un logiciel) ----
+    var deferredPrompt=null;
+    window.addEventListener('beforeinstallprompt', function(e){
+      e.preventDefault(); deferredPrompt=e;
+      var b=document.getElementById('installBtn'); if(b) b.style.display='inline-flex';
+    });
+    window.pbInstallApp=function(){
+      if(!deferredPrompt){ toast(t('inst_hint')); return; }
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(function(c){
+        if(c && c.outcome==='accepted'){ toast(t('inst_ok')); }
+        deferredPrompt=null;
+        var b=document.getElementById('installBtn'); if(b) b.style.display='none';
+      });
+    };
+    window.addEventListener('appinstalled', function(){
+      var b=document.getElementById('installBtn'); if(b) b.style.display='none';
+      try{ toast(t('inst_ok')); }catch(e){}
+    });
   }catch(e){ /* PWA optionnelle : ne jamais bloquer l'app */ }
 })();
 
