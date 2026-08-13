@@ -20,7 +20,9 @@ exports.handler = async () => {
   try {
     // Requête la plus légère possible : on ne demande aucune ligne (limit=0),
     // mais la base est bien sollicitée — c'est ce qui compte pour Supabase.
-    const r = await fetch(url + '/rest/v1/states?select=id&limit=1', {
+    // Un slash final dans SUPABASE_URL casserait le chemin (PGRST125) : on normalise.
+    const base = String(url).trim().replace(/\/+$/, '').replace(/\/rest\/v1$/, '');
+    const r = await fetch(base + '/rest/v1/states?select=id&limit=1', {
       headers: { apikey: key, Authorization: 'Bearer ' + key, Accept: 'application/json' }
     });
     console.log('keep-alive Supabase →', r.status);

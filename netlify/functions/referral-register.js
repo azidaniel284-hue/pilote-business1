@@ -25,8 +25,14 @@ async function diag(res) {
                : 'store_error';
   return { reason, http: res.status, detail };
 }
+// Normalise l'URL Supabase. Un simple slash final dans la variable d'environnement
+// produisait « ...//rest/v1/... », rejeté par Supabase avec l'erreur PGRST125
+// (« Invalid path specified in request URL »). On tolère aussi un /rest/v1 déjà collé.
+function sbBase(u) {
+  return String(u || '').trim().replace(/\/+$/, '').replace(/\/rest\/v1$/, '');
+}
 function sb(path, opts, SB_URL, SB_KEY) {
-  return fetch(SB_URL + '/rest/v1/' + path, Object.assign({}, opts, {
+  return fetch(sbBase(SB_URL) + '/rest/v1/' + path, Object.assign({}, opts, {
     headers: Object.assign({
       'apikey': SB_KEY,
       'Authorization': 'Bearer ' + SB_KEY,

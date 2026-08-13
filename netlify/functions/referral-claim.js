@@ -15,6 +15,10 @@ const REWARD_FCFA = 1000;
 function reply(status, obj, cors) {
   return { statusCode: status, headers: cors, body: JSON.stringify(obj) };
 }
+// Normalise l'URL Supabase (slash final ou /rest/v1 déjà collé) — sinon PGRST125.
+function sbBase(u) {
+  return String(u || '').trim().replace(/\/+$/, '').replace(/\/rest\/v1$/, '');
+}
 
 // Vérifie la licence auprès de Chariow (même logique que verify-license).
 async function licenseActive(key) {
@@ -63,7 +67,9 @@ exports.handler = async (event) => {
     const hash = crypto.createHash('sha256').update(key).digest('hex');
 
     // 3) Enregistrement. La contrainte UNIQUE bloque tout double comptage.
-    const r = await fetch(SB_URL + '/rest/v1/referrals', {
+    // sbBase() : un slash final dans SUPABASE_URL produirait « ...//rest/v1/... »,
+    // rejeté par Supabase (PGRST125). On normalise plutôt que de le subir.
+    const r = await fetch(sbBase(SB_URL) + '/rest/v1/referrals', {
       method: 'POST',
       headers: {
         'apikey': SB_KEY,
