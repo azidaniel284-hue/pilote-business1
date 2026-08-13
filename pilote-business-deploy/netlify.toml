@@ -1,0 +1,13 @@
+# Configuration Netlify — site statique (1 fichier) + 2 fonctions serverless
+[build]
+  publish = "."
+  functions = "netlify/functions"
+
+# Les variables secrètes (CHARIOW_API_KEY, GROQ_API_KEY, SUPABASE_SERVICE_ROLE)
+# NE sont PAS ici : on les définit dans Netlify → Site settings → Environment variables.
+
+# Maintien en vie de la base Supabase (offre gratuite = pause après 7 jours sans
+# requête). Ping automatique le lundi et le jeudi à 6 h UTC : le projet ne dort
+# plus jamais, sans abonnement.
+[functions."keep-alive"]
+  schedule = "0 6 * * 1,4"
