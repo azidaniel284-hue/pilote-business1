@@ -11,3 +11,10 @@
 # plus jamais, sans abonnement.
 [functions."keep-alive"]
   schedule = "0 6 * * 1,4"
+
+# Rappels quotidiens (Web Push). On tourne CHAQUE HEURE, pile à l'heure ronde :
+# la fonction ne notifie que les abonnés pour qui il est l'heure choisie DANS
+# LEUR fuseau. Un utilisateur à Dubaï et un utilisateur à Lomé reçoivent donc
+# tous les deux leur rappel à 8 h chez eux, avec une seule planification.
+[functions."push-daily"]
+  schedule = "0 * * * *"

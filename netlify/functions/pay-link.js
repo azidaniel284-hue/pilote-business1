@@ -14,7 +14,12 @@
 // deux fonctions — creer() et statut(). Ajouter PayDunya, FedaPay ou CashPay ne
 // demande que d'ajouter une entrée dans PROVIDERS, rien d'autre ne bouge.
 
-const CURRENCIES_OK = ['XOF', 'XAF', 'GNF', 'CDF', 'USD', 'EUR'];
+// Devises acceptées. Doit couvrir toutes celles proposées dans l'app (CURRENCIES
+// côté client) : une devise absente d'ici fait échouer la création du lien alors
+// que l'utilisateur l'a choisie dans ses réglages.
+const CURRENCIES_OK = ['XOF', 'XAF', 'GNF', 'CDF', 'NGN', 'GHS', 'KES', 'UGX', 'TZS',
+                       'RWF', 'ZAR', 'ZMW', 'EGP', 'MAD', 'TND', 'DZD',
+                       'AED', 'SAR', 'QAR', 'USD', 'EUR', 'GBP', 'CAD', 'CHF'];
 
 function reply(status, obj, cors) {
   return { statusCode: status, headers: cors, body: JSON.stringify(obj) };
