@@ -68,19 +68,70 @@ async function notifier(a) {
           `<hr><p style="white-space:pre-wrap">${esc(a.message)}</p>`
       })
     });
-    return { envoye: r.ok, http: r.status };
-  } catch (e) { return { envoye: false, raison: 'reseau' }; }
+    if (r.ok) return { envoye: true, http: r.status };
+    // Diagnostic lisible : sans lui, un envoi refuse (IP non autorisee,
+    // expediteur inconnu, quota) echouait en silence et l'avis restait
+    // invisible pour le proprietaire.
+    let detail = '';
+    try {
+      const d = await r.json();
+      detail = String((d && (d.message || d.code)) || '').slice(0, 200);
+    } catch (_) {}
+    const raison = r.status === 401 ? 'cle_refusee_ou_ip_non_autorisee'
+                 : r.status === 400 ? 'expediteur_ou_donnees_refuses'
+                 : r.status === 402 ? 'quota_epuise'
+                 : 'brevo_' + r.status;
+    return { envoye: false, http: r.status, raison, detail };
+  } catch (e) { return { envoye: false, raison: 'reseau', detail: String(e && e.message || '') }; }
+}
+
+/* Auto-diagnostic : dit ce qui est configure et si Brevo accepte la cle depuis
+   CETTE machine, SANS envoyer le moindre message et sans exposer de secret.
+   Appel : GET /.netlify/functions/avis?diag=1 */
+async function diagnostic() {
+  const out = {
+    supabase_url:  !!process.env.SUPABASE_URL,
+    supabase_cle:  !!process.env.SUPABASE_SERVICE_ROLE,
+    brevo_cle:     !!process.env.BREVO_API_KEY,
+    expediteur:    process.env.AVIS_FROM || 'noreply@pilote-business.com',
+    destinataire:  process.env.AVIS_TO   || 'azidaniel284@gmail.com'
+  };
+  // La table existe-t-elle et la cle de service passe-t-elle ?
+  if (out.supabase_url && out.supabase_cle) {
+    try {
+      const r = await sb('avis?select=id&limit=1', {}, process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE);
+      out.table_avis = r.ok ? 'ok' : (r.status === 404 ? 'ABSENTE — exécute supabase-avis.sql'
+                                    : (r.status === 401 || r.status === 403) ? 'CLE REFUSEE' : 'erreur_' + r.status);
+    } catch (e) { out.table_avis = 'injoignable'; }
+  } else out.table_avis = 'non_configure';
+  // La cle Brevo est-elle acceptee DEPUIS CETTE IP ? (lecture seule, aucun envoi)
+  if (out.brevo_cle) {
+    try {
+      const r = await fetch('https://api.brevo.com/v3/account', {
+        headers: { 'api-key': process.env.BREVO_API_KEY, 'Accept': 'application/json' } });
+      out.brevo = r.ok ? 'ok'
+                : r.status === 401 ? 'REFUSEE — clé invalide, ou IP non autorisée dans Brevo'
+                : 'erreur_' + r.status;
+      if (r.ok) { try { const d = await r.json(); out.brevo_compte = d.email || ''; } catch (_) {} }
+    } catch (e) { out.brevo = 'injoignable'; }
+  } else out.brevo = 'non_configure';
+  return out;
 }
 
 exports.handler = async (event) => {
   const cors = {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'POST,OPTIONS',
+    'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Content-Type': 'application/json',
     'Cache-Control': 'no-store'
   };
   if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: cors, body: '' };
+  // Auto-diagnostic : aucun secret n'est renvoye, aucun message n'est envoye.
+  if (event.httpMethod === 'GET' && event.queryStringParameters
+      && event.queryStringParameters.diag) {
+    return reply(200, await diagnostic(), cors);
+  }
   if (event.httpMethod !== 'POST') return reply(405, { ok: false, reason: 'method' }, cors);
 
   try {
@@ -122,10 +173,18 @@ exports.handler = async (event) => {
         version: String(b.version || '').slice(0, 24)
       }))
     }, SB_URL, SB_KEY);
-    if (!r.ok) return reply(200, Object.assign({ ok: false }, await diag(r)), cors);
 
+    // L'e-mail part DANS TOUS LES CAS : c'est le canal par lequel le
+    // proprietaire apprend qu'un avis existe. Si la base est en panne ou la
+    // table absente, l'avis ne doit pas disparaitre pour autant.
     const mail = await notifier(avis);
-    return reply(200, { ok: true, stocke: true, notifie: !!mail.envoye }, cors);
+    const stocke = r.ok;
+    if (!stocke && !mail.envoye) {
+      const d = await diag(r);
+      return reply(200, Object.assign({ ok: false }, d, { mail: mail.raison || '' }), cors);
+    }
+    return reply(200, { ok: true, stocke, notifie: !!mail.envoye,
+                        mail: mail.envoye ? '' : (mail.raison || '') }, cors);
   } catch (e) {
     return reply(200, { ok: false, reason: 'server' }, cors);
   }
